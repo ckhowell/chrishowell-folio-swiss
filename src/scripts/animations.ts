@@ -5,27 +5,54 @@ import { SplitText } from 'gsap/SplitText';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
 
-// ── LENIS SMOOTH SCROLL ─────────────────────────────────────────────
-const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-  touchMultiplier: 2,
-});
+declare global {
+  interface Window {
+    __chSiteInited?: boolean;
+  }
+}
 
-lenis.on('scroll', ScrollTrigger.update);
+let lenis: Lenis | null = null;
+let paragraphObserver: IntersectionObserver | null = null;
+let titleObserver: IntersectionObserver | null = null;
+let opaObserver: IntersectionObserver | null = null;
+let pillMeasureEl: HTMLSpanElement | null = null;
+let nextProjectTickerCallback: (() => void) | null = null;
 
-gsap.ticker.add((time) => {
-  lenis.raf(time * 1000);
-});
-gsap.ticker.lagSmoothing(0);
+function prefersReducedMotion() {
+  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+export function initSiteOnce() {
+  if (window.__chSiteInited) return;
+  window.__chSiteInited = true;
+
+  if (!prefersReducedMotion()) {
+    lenis = new Lenis({
+      duration: 1.2,
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      touchMultiplier: 2,
+    });
+
+    lenis.on('scroll', ScrollTrigger.update);
+
+    gsap.ticker.add((time) => {
+      lenis?.raf(time * 1000);
+    });
+    gsap.ticker.lagSmoothing(0);
+  }
+
+  initCustomCursorOnce();
+}
 
 // ── PARAGRAPH REVEAL — SplitText line-by-line mask ──────────────────
 function initParagraphAnimations() {
+  paragraphObserver?.disconnect();
+
   const elements = document.querySelectorAll(
     '[data-animation="paragraph"]:not(.--is-visible)'
   );
 
-  const observer = new IntersectionObserver(
+  paragraphObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -65,23 +92,25 @@ function initParagraphAnimations() {
             },
           });
 
-          observer.unobserve(el);
+          paragraphObserver?.unobserve(el);
         }
       });
     },
     { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
   );
 
-  elements.forEach((el) => observer.observe(el));
+  elements.forEach((el) => paragraphObserver?.observe(el));
 }
 
 // ── TITLE REVEAL — SplitText character-by-character mask ────────────
 function initTitleAnimations() {
+  titleObserver?.disconnect();
+
   const elements = document.querySelectorAll(
     '[data-animation="title"]:not(.--is-visible), [data-animation="title-in"]:not(.--is-visible)'
   );
 
-  const observer = new IntersectionObserver(
+  titleObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
@@ -106,14 +135,14 @@ function initTitleAnimations() {
             },
           });
 
-          observer.unobserve(el);
+          titleObserver?.unobserve(el);
         }
       });
     },
     { threshold: 0.1 }
   );
 
-  elements.forEach((el) => observer.observe(el));
+  elements.forEach((el) => titleObserver?.observe(el));
 }
 
 // ── GALLERY IMAGE REVEAL — Staggered fade-up ────────────────────────
@@ -147,27 +176,29 @@ function initGalleryAnimations() {
 
 // ── OPACITY-IN ANIMATIONS (CSS transition based) ─────────────────────
 function initOpaInAnimations() {
+  opaObserver?.disconnect();
+
   const elements = document.querySelectorAll(
     '[data-animation="opa-in"]:not(.--is-visible)'
   );
 
-  const observer = new IntersectionObserver(
+  opaObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add('--is-visible');
-          observer.unobserve(entry.target);
+          opaObserver?.unobserve(entry.target);
         }
       });
     },
     { threshold: 0.1 }
   );
 
-  elements.forEach((el) => observer.observe(el));
+  elements.forEach((el) => opaObserver?.observe(el));
 }
 
 // ── CUSTOM CURSOR — Mouse-following dot (basecreate lerp) ───────────
-function initCustomCursor() {
+function initCustomCursorOnce() {
   if (!window.matchMedia('(hover: hover)').matches) return;
 
   const cursor = document.querySelector('.custom-cursor') as HTMLElement;
@@ -184,15 +215,6 @@ function initCustomCursor() {
     mouseY = e.clientY;
   });
 
-  // Show cursor on first mouse move inside main
-  document.querySelector('main')?.addEventListener(
-    'mousemove',
-    () => {
-      cursor.classList.add('--init');
-    },
-    { once: true }
-  );
-
   // Hide when mouse leaves the browser window
   document.addEventListener('mouseleave', () => {
     cursor.classList.remove('--init');
@@ -208,6 +230,18 @@ function initCustomCursor() {
 
     gsap.set(cursor, { left: posX, top: posY });
   });
+}
+
+function bindCursorInitToMain() {
+  if (!window.matchMedia('(hover: hover)').matches) return;
+  const cursor = document.querySelector('.custom-cursor') as HTMLElement;
+  if (!cursor) return;
+
+  document.querySelector('main')?.addEventListener(
+    'mousemove',
+    () => cursor.classList.add('--init'),
+    { once: true }
+  );
 }
 
 // ── PILL HOVER — Pill animation + ticker on thumbnail hover ─────────
@@ -229,11 +263,13 @@ function initPillHover() {
   let pillTimeline: gsap.core.Timeline | null = null;
 
   // Hidden measurement container — avoids flash from toggling pill visibility
-  const measureEl = document.createElement('span');
-  measureEl.style.cssText =
-    'position:absolute;visibility:hidden;white-space:nowrap;font-size:0.75rem;' +
-    'font-weight:500;text-transform:uppercase;letter-spacing:0.05em;padding-right:2rem;';
-  document.body.appendChild(measureEl);
+  if (!pillMeasureEl) {
+    pillMeasureEl = document.createElement('span');
+    pillMeasureEl.style.cssText =
+      'position:absolute;visibility:hidden;white-space:nowrap;font-size:0.75rem;' +
+      'font-weight:500;text-transform:uppercase;letter-spacing:0.05em;padding-right:2rem;';
+    document.body.appendChild(pillMeasureEl);
+  }
 
   // All elements with data-cursor-text
   const hoverTargets = document.querySelectorAll('[data-cursor-text]');
@@ -246,8 +282,8 @@ function initPillHover() {
       texts.forEach((t) => (t.textContent = label));
 
       // Measure via offscreen element — no pill flash
-      measureEl.textContent = label;
-      const singleWidth = measureEl.offsetWidth;
+      pillMeasureEl!.textContent = label;
+      const singleWidth = pillMeasureEl!.offsetWidth;
       const pillWidth = singleWidth + 24;
 
       // Kill any existing animations
@@ -478,6 +514,7 @@ function initNextProjectPreview() {
         });
       };
       gsap.ticker.add(tickerCallback);
+      nextProjectTickerCallback = tickerCallback;
     }
   });
 
@@ -490,6 +527,7 @@ function initNextProjectPreview() {
       if (!isHovering && tickerCallback) {
         gsap.ticker.remove(tickerCallback);
         tickerCallback = null;
+        nextProjectTickerCallback = null;
       }
     }, 600);
   });
@@ -501,12 +539,38 @@ function initNextProjectPreview() {
   });
 }
 
-// ── INITIALIZE ───────────────────────────────────────────────────────
-initParagraphAnimations();
-initTitleAnimations();
-initGalleryAnimations();
-initOpaInAnimations();
-initCustomCursor();
-initPillHover();
-initProjectHoverEffects();
-initNextProjectPreview();
+export function cleanupPage() {
+  paragraphObserver?.disconnect();
+  paragraphObserver = null;
+
+  titleObserver?.disconnect();
+  titleObserver = null;
+
+  opaObserver?.disconnect();
+  opaObserver = null;
+
+  if (nextProjectTickerCallback) {
+    gsap.ticker.remove(nextProjectTickerCallback);
+    nextProjectTickerCallback = null;
+  }
+
+  ScrollTrigger.getAll().forEach((t) => t.kill());
+}
+
+export function initPage() {
+  cleanupPage();
+
+  bindCursorInitToMain();
+  initParagraphAnimations();
+  initTitleAnimations();
+  initGalleryAnimations();
+  initOpaInAnimations();
+  initPillHover();
+  initProjectHoverEffects();
+  initNextProjectPreview();
+
+  ScrollTrigger.refresh();
+}
+
+initSiteOnce();
+initPage();

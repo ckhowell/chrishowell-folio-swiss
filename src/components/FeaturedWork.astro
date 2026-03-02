@@ -35,7 +35,10 @@ const projectColors: Record<string, string> = {
             return (
               <div class="projects__item" data-project-index={i} data-animation="opa-in">
                 <a href={`/work/${project.slug}`} class="projects__link block" data-background-color={bgColor}>
-                  <div class="projects__thumb relative aspect-[520/370] w-full s:w-[17.55vw] overflow-hidden" data-cursor-text={project.data.client}>
+                  <div
+                    class="projects__thumb relative aspect-[520/370] w-full s:w-[17.55vw] overflow-hidden"
+                    data-cursor-text={project.data.client}
+                  >
                     <img class="projects__img object-cover absolute size-full top-0 left-0" src={imgSrc} alt={project.data.title} loading="lazy" />
                   </div>
                 </a>
@@ -51,7 +54,10 @@ const projectColors: Record<string, string> = {
           {
             featured.map((project, i) => (
               <a href={`/work/${project.slug}`} class="block">
-                <p class="projects__title text-lg font-medium opacity-20 w-max overflow-hidden" data-project-index={i}>
+                <p
+                  class="projects__title text-lg font-medium opacity-20 w-max overflow-hidden"
+                  data-project-index={i}
+                >
                   {project.data.title}
                 </p>
               </a>

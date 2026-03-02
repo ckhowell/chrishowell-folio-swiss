@@ -515,3 +515,40 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* ── VIEW TRANSITIONS (Astro ClientRouter) ────────────────────────── */
+@media (prefers-reduced-motion: no-preference) {
+  ::view-transition-old(root) {
+    animation: ch-page-out 0.55s var(--expo-ease-in-out) both;
+  }
+
+  ::view-transition-new(root) {
+    animation: ch-page-in 0.55s var(--expo-ease-in-out) both;
+  }
+}
+
+@keyframes ch-page-out {
+  from {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(-8px);
+    filter: blur(2px);
+  }
+}
+
+@keyframes ch-page-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+    filter: blur(2px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
