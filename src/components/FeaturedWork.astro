@@ -1,0 +1,85 @@
+---
+import { getCollection } from 'astro:content';
+
+const projects = await getCollection('projects');
+const featured = projects
+  .filter((p) => p.data.isFeatured)
+  .sort((a, b) => new Date(b.data.publishDate).getTime() - new Date(a.data.publishDate).getTime());
+
+// Brand-tinted overlay colors per project
+const projectColors: Record<string, string> = {
+  'erni': '#3a2d5c',
+  'arrow': '#1a1a2e',
+  'city-of-gold-coast': '#1e3a3a',
+  'peerless': '#2e1e2e',
+  'exintech': '#1e2e3a',
+  'no-pong': '#3a3420',
+  'sunland-group': '#1e2e24',
+  'qld-government': '#1a2640',
+  'allconnex': '#2a3020',
+};
+---
+
+<section class="projects section relative pb-64 s:pb-120 pt-100 s:pt-0">
+  <div class="-container">
+    <div class="-grid relative">
+      <!-- Left label column (desktop only) -->
+      <div class="s:block hidden s:col-span-3">
+        <h2
+          class="h2 s:sticky s:top-[55svh]"
+          data-animation="paragraph"
+        >
+          Work
+        </h2>
+      </div>
+
+      <!-- Mobile heading -->
+      <div class="s:hidden col-span-full mb-40">
+        <h2 class="h2" data-animation="paragraph">Work</h2>
+      </div>
+
+      <!-- Project list -->
+      <div class="projects-hover-group space-y-20 s:space-y-12 s:col-start-7 s:col-span-6 col-span-full">
+        {featured.map((project, i) => {
+          const imgSrc = typeof project.data.image === 'string'
+            ? project.data.image
+            : project.data.image[0];
+          const bgColor = projectColors[project.slug] || '#1a1a1a';
+          return (
+            <div class="projects__item" data-project-index={i} data-animation="opa-in">
+              <a href={`/work/${project.slug}`}
+                 class="projects__link block"
+                 data-cursor-text={project.data.client}
+                 data-background-color={bgColor}>
+                <div class="projects__thumb relative aspect-[520/370] w-full s:w-[17.55vw] overflow-hidden">
+                  <img
+                    class="projects__img object-cover absolute size-full top-0 left-0"
+                    src={imgSrc}
+                    alt={project.data.title}
+                    loading="lazy"
+                  />
+                </div>
+              </a>
+            </div>
+          );
+        })}
+      </div>
+
+      <!-- Right project titles column (desktop only) -->
+      <div class="hidden s:flex s:col-span-2 s:col-start-14 relative items-end min-h-full mt-100 s:mt-0">
+        <div class="projects-titles s:sticky s:bottom-20">
+          {featured.map((project, i) => (
+            <a href={`/work/${project.slug}`} class="block">
+              <p
+                class="projects__title text-lg font-medium opacity-20 w-max overflow-hidden"
+                data-project-index={i}
+              >
+                {project.data.title}
+              </p>
+            </a>
+          ))}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

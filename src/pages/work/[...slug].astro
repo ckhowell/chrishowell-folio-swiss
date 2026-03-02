@@ -1,0 +1,138 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+
+export async function getStaticPaths() {
+  const projects = await getCollection('projects');
+  return projects.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+}
+
+const { project } = Astro.props;
+const { Content } = await project.render();
+const { title, client, description, year, services, contribution, agency } =
+  project.data;
+
+// Next project navigation (cycle through featured projects)
+const allProjects = await getCollection('projects');
+const sorted = allProjects
+  .filter((p) => p.data.isFeatured)
+  .sort(
+    (a, b) =>
+      new Date(b.data.publishDate).getTime() -
+      new Date(a.data.publishDate).getTime()
+  );
+const currentIndex = sorted.findIndex((p) => p.slug === project.slug);
+const nextProject = currentIndex >= 0
+  ? sorted[(currentIndex + 1) % sorted.length]
+  : sorted[0];
+---
+
+<BaseLayout title={`${title} | Chris Howell`} bodyClass="work">
+  <!-- Back link -->
+  <a
+    href="/"
+    class="fixed top-0 right-0 p-20 text-base font-medium z-50"
+    data-animation="paragraph"
+  >
+    &larr; Back
+  </a>
+
+  <!-- Metadata grid -->
+  <section class="pt-[50vh] pb-64 s:pb-100">
+    <div class="-container -grid">
+      <!-- Title -->
+      <div class="col-span-full s:col-span-5">
+        <h1
+          class="text-h1 s:text-h2 font-medium"
+          data-animation="title"
+        >
+          {title}
+        </h1>
+      </div>
+
+      <!-- Description -->
+      {description && (
+        <div class="col-span-full s:col-span-4 s:col-start-7 mt-32 s:mt-0">
+          <p
+            class="text-base font-medium leading-tight"
+            data-animation="paragraph"
+          >
+            {description}
+          </p>
+        </div>
+      )}
+
+      <!-- Details column -->
+      <div class="col-span-full s:col-span-3 s:col-start-12 mt-32 s:mt-0 space-y-16">
+        {year && (
+          <div data-animation="paragraph">
+            <p class="text-xs uppercase tracking-wide opacity-50">Year</p>
+            <p class="text-base font-medium">{year}</p>
+          </div>
+        )}
+        {services && services.length > 0 && (
+          <div data-animation="paragraph" data-animation-delay="0.1">
+            <p class="text-xs uppercase tracking-wide opacity-50">Services</p>
+            <p class="text-base font-medium">{services.join(', ')}</p>
+          </div>
+        )}
+        {agency && (
+          <div data-animation="paragraph" data-animation-delay="0.2">
+            <p class="text-xs uppercase tracking-wide opacity-50">Agency</p>
+            <p class="text-base font-medium">{agency}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <!-- Project images (rendered markdown body) -->
+  <section class="project-gallery pb-64 s:pb-120">
+    <div class="-container">
+      <Content />
+    </div>
+  </section>
+
+  <!-- Next project -->
+  {nextProject && (() => {
+    const nextImg = typeof nextProject.data.image === 'string'
+      ? nextProject.data.image
+      : nextProject.data.image[0];
+    return (
+      <section class="next-project border-t-1 border-black/20 pt-48 s:pt-80 pb-64 s:pb-120">
+        <div class="-container -grid">
+          <div class="col-span-full s:col-span-5">
+            <p
+              class="text-xs uppercase tracking-wide opacity-50 mb-8"
+              data-animation="paragraph"
+            >
+              Next Project
+            </p>
+            <a
+              href={`/work/${nextProject.slug}`}
+              class="next-project__link text-h1 s:text-h2 font-medium block"
+              data-animation="title"
+            >
+              {nextProject.data.title}
+            </a>
+          </div>
+        </div>
+
+        <!-- Mouse-following preview thumbnail -->
+        <div class="next-project__preview" aria-hidden="true">
+          <div class="next-project__preview-inner">
+            <img
+              class="next-project__preview-img"
+              src={nextImg}
+              alt=""
+              loading="lazy"
+            />
+          </div>
+        </div>
+      </section>
+    );
+  })()}
+</BaseLayout>

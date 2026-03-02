@@ -1,0 +1,94 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout
+  title="About | Chris Howell"
+  bodyClass="about"
+  currentPage="about"
+>
+  <section class="intro section pt-64 s:pt-160 pb-40 s:pb-100 s:min-h-screen">
+    <!-- Back link -->
+    <a
+      href="/"
+      class="fixed top-0 right-0 p-20 text-base font-medium z-50"
+      data-animation="paragraph"
+    >
+      &larr; Back
+    </a>
+
+    <!-- Fixed subtitle (desktop only) -->
+    <p
+      class="fixed bottom-20 left-20 s:block hidden text-[0.925rem] s:text-base font-medium"
+      data-animation="paragraph"
+    >
+      Creative Designer &amp; Director
+      <br />
+      Gold Coast, Australia
+    </p>
+
+    <div class="-container -grid s:gap-y-0 gap-y-64">
+      <!-- Title & bio -->
+      <div class="col-span-full s:col-span-4 s:col-start-11">
+        <div class="pl-[5.5rem] s:pl-0">
+          <h1
+            class="text-h1 s:text-h2 font-medium mb-32 s:pl-0"
+            data-animation="title"
+          >
+            About
+          </h1>
+        </div>
+        <p
+          class="font-medium text-[1rem] s:text-[1.2rem] m:text-[1rem] leading-tight"
+          data-animation="paragraph"
+        >
+          <span class="block">
+            I'm Chris Howell, a Creative Designer &amp; Director based on the Gold Coast, Australia.
+          </span>
+          <span class="block">
+            With over 20 years of experience in branding, UI/UX, and digital content,
+            I help businesses communicate clearly and look their best. I combine creativity
+            and strategy to deliver work that resonates with purpose and precision.
+          </span>
+          <span class="block">
+            Currently available for select projects and creative direction.
+          </span>
+        </p>
+      </div>
+
+      <!-- Experience -->
+      <div class="col-span-full s:col-span-6 font-medium">
+        <p class="text-xl" data-animation="paragraph">Experience</p>
+        <ul class="text-xs s:text-sm mt-20" data-animation="paragraph">
+          <li class="grid grid-cols-3 gap-12">
+            <span>Halfnine Design</span>
+            <span>2010 &mdash; Present</span>
+            <span>Director / Designer</span>
+          </li>
+          <li class="grid grid-cols-3 gap-12">
+            <span>Freelance</span>
+            <span>2005 &mdash; 2010</span>
+            <span>Creative Designer</span>
+          </li>
+        </ul>
+      </div>
+
+      <!-- Expertise -->
+      <div class="col-span-full s:col-span-6 font-medium mt-48">
+        <p class="text-xl" data-animation="paragraph">Expertise</p>
+        <ul class="text-xs s:text-sm mt-20" data-animation="paragraph">
+          <li class="grid grid-cols-3 gap-12">
+            <span>Brand Identity</span>
+            <span>UI/UX Design</span>
+            <span>Creative Direction</span>
+          </li>
+          <li class="grid grid-cols-3 gap-12">
+            <span>Web Design</span>
+            <span>Digital Content</span>
+            <span>Motion Graphics</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

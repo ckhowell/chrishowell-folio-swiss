@@ -1,0 +1,48 @@
+---
+import BaseHead from '../components/BaseHead.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+
+export interface Props {
+  title: string;
+  description?: string;
+  bodyClass?: string;
+  currentPage?: string;
+}
+
+const { title, description, bodyClass = '', currentPage = '' } = Astro.props;
+---
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <BaseHead title={title} description={description} />
+  </head>
+  <body class={bodyClass} data-route-class={bodyClass}>
+    <!-- Full-page color overlay for project hover effect -->
+    <div class="color-overlay" aria-hidden="true"></div>
+
+    <Header currentPage={currentPage} />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+
+    <!-- Custom cursor -->
+    <div class="custom-cursor" aria-hidden="true">
+      <div class="cursor-dot"></div>
+      <div class="cursor-pill">
+        <div class="cursor-pill-bg"></div>
+        <div class="cursor-text-wrap">
+          <span class="cursor-text"></span>
+          <span class="cursor-text cursor-text--dupe"></span>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      import '../scripts/animations.ts';
+    </script>
+  </body>
+</html>

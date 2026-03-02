@@ -1,0 +1,462 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── FONTS ────────────────────────────────────────────────────────────── */
+@layer base {
+  @font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('/fonts/PPNeueMontreal-Book.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('/fonts/PPNeueMontreal-Medium.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('/fonts/PPNeueMontreal-SemiBold.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+  }
+  @font-face {
+    font-family: 'PP Neue Montreal';
+    src: url('/fonts/PPNeueMontreal-Bold.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  /* ── FLUID TYPOGRAPHY ─────────────────────────────────────────────── */
+  :root {
+    --size: 375;
+    --font-size: clamp(1px, 16px, calc(16 * 100vw / var(--size)));
+
+    /* Easing variables */
+    --power-2-ease-out: cubic-bezier(0.215, 0.61, 0.355, 1);
+    --power-3-ease-out: cubic-bezier(0.165, 0.84, 0.44, 1);
+    --power-4-ease-out: cubic-bezier(0.23, 1, 0.32, 1);
+    --expo-ease-out: cubic-bezier(0.19, 1, 0.22, 1);
+    --expo-ease-in-out: cubic-bezier(1, 0, 0, 1);
+  }
+
+  @media (min-width: 640px) {
+    :root {
+      --size: 800;
+      --font-size: clamp(1px, 100px, calc(16 * 100vw / var(--size)));
+    }
+  }
+
+  @media (min-width: 1025px) {
+    :root {
+      --size: 1440;
+      --font-size: clamp(1px, 100px, calc(16 * 100vw / var(--size)));
+    }
+  }
+
+  html {
+    font-size: var(--font-size);
+  }
+
+  /* ── BASE STYLES ──────────────────────────────────────────────────── */
+  html,
+  body {
+    max-width: 100vw;
+    overflow-x: clip;
+    background-color: #f7f7f7;
+    color: #1a1a1a;
+    font-family: 'PP Neue Montreal', sans-serif;
+    font-kerning: none;
+    text-rendering: optimizeSpeed;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Hidden scrollbar */
+  html {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  html::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* Selection */
+  ::selection {
+    background-color: #1a1a1a;
+    color: #fff;
+  }
+
+  /* Headings */
+  h1, h2, h3, h4, h5, h6 {
+    line-height: 1.25;
+  }
+  h1, .h1 {
+    font-size: 5.625rem;
+    line-height: 1;
+    font-weight: 500;
+  }
+  h2, .h2 {
+    font-size: 1.5rem;
+    line-height: 1;
+    font-weight: 500;
+  }
+  @media (min-width: 1025px) {
+    h2, .h2 {
+      font-size: 4.5rem;
+      line-height: 1;
+    }
+  }
+
+  /* Reset links */
+  a {
+    color: inherit;
+    text-decoration: inherit;
+  }
+}
+
+/* ── 16-COLUMN GRID SYSTEM ────────────────────────────────────────── */
+@layer components {
+  .-container {
+    width: 100%;
+    padding-left: 1.25rem;
+    padding-right: 1.25rem;
+  }
+
+  .-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    column-gap: 0.75rem;
+  }
+
+  @media (min-width: 640px) {
+    .-grid {
+      grid-template-columns: repeat(16, minmax(0, 1fr));
+      column-gap: 0.75rem;
+    }
+  }
+}
+
+/* ── ANIMATION STATES ─────────────────────────────────────────────── */
+[data-animation="paragraph"],
+[data-animation="title"],
+[data-animation="title-in"],
+[data-animation="subtitle"] {
+  visibility: hidden;
+}
+
+[data-animation="paragraph"].--is-visible,
+[data-animation="title"].--is-visible,
+[data-animation="title-in"].--is-visible,
+[data-animation="subtitle"].--is-visible {
+  visibility: visible !important;
+}
+
+[data-animation="opa-in"] {
+  opacity: 0 !important;
+  transition: opacity 0.7s var(--power-2-ease-out);
+  transition-delay: 0.2s;
+}
+
+[data-animation="opa-in"].--is-visible {
+  opacity: 1 !important;
+}
+
+/* ── CUSTOM CURSOR ─────────────────────────────────────────────── */
+.custom-cursor {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 100;
+  pointer-events: none;
+  display: none;
+  mix-blend-mode: difference;
+  transform: translate(-50%, -50%);
+}
+
+@media (hover: hover) {
+  .custom-cursor.--init {
+    display: block;
+  }
+}
+
+/* The always-visible small dot */
+.cursor-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #f7f7f7;
+  transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* The expanding pill */
+.cursor-pill {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  height: 2rem;
+  border-radius: 3.5em;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  width: 0;
+  opacity: 0;
+}
+
+.cursor-pill-bg {
+  position: absolute;
+  inset: 0;
+  background: #1a1a1a;
+  border-radius: inherit;
+  transform: scaleX(0);
+  transform-origin: center;
+}
+
+.cursor-text-wrap {
+  display: flex;
+  white-space: nowrap;
+  position: relative;
+  padding: 0 0.75rem;
+  opacity: 0;
+}
+
+.cursor-text {
+  color: #f7f7f7;
+  font-size: 0.75rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  padding-right: 2rem;
+}
+
+/* ── COLOR OVERLAY (full-page tint on project hover) ────────────── */
+.color-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  background-color: transparent;
+  opacity: 0;
+  transition: background-color 0.4s cubic-bezier(0.5, 0, 0.25, 1),
+              opacity 0.4s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+.color-overlay.--active {
+  opacity: 0.12;
+}
+
+/* ── PROJECT ITEM EFFECTS ────────────────────────────────────────── */
+
+/* Shared transition timing — matches basecreate's --animation-thumb */
+.projects__thumb {
+  border-radius: 0.5rem;
+  transition: border-radius 0.4s cubic-bezier(0.5, 0, 0.25, 1),
+              box-shadow 0.4s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+.projects__img {
+  transform: scale(1) rotate(0.001deg);
+  transition: transform 0.4s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+.projects__link {
+  transition: opacity 0.4s cubic-bezier(0.5, 0, 0.25, 1),
+              filter 0.4s cubic-bezier(0.5, 0, 0.25, 1),
+              transform 0.4s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+/* ── Hovered item: circle mask + image zoom ── */
+@media (hover: hover) {
+  .projects__item.--hover .projects__thumb {
+    border-radius: 1.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.35);
+  }
+
+  .projects__item.--hover .projects__img {
+    transform: scale(1.1) rotate(0.001deg);
+  }
+
+  /* ── Non-hovered siblings: dim + grayscale + shrink ── */
+  .projects__item.--no-hover .projects__link {
+    opacity: 0.15;
+    filter: grayscale(1);
+    transform: scale(0.9) rotate(0.001deg);
+  }
+
+  /* Hide default cursor over project links */
+  .projects__link {
+    cursor: none;
+  }
+}
+
+/* Right-column title highlight */
+.projects__title {
+  transition: opacity 0.4s cubic-bezier(0.5, 0, 0.25, 1);
+}
+.projects__title.--is-active {
+  opacity: 1 !important;
+}
+
+/* ── PROJECT GALLERY (detail page) ─────────────────────────────── */
+
+/* Markdown images: ![alt](/img.jpg) renders as <p><img></p> */
+.project-gallery p {
+  margin: 0;
+}
+
+/* All gallery images: full container width, rounded, vertical padding */
+.project-gallery img {
+  width: 100%;
+  height: auto;
+  display: block;
+  border-radius: 1.5rem;
+}
+
+/* Vertical spacing between gallery items */
+.project-gallery > * {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+/* Custom layout classes from existing markdown content */
+.project-gallery .one-col,
+.project-gallery .full-bleed,
+.project-gallery .full-parallax,
+.project-gallery .hero-image {
+  width: 100%;
+}
+
+.project-gallery .two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.project-gallery .three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+}
+
+.project-gallery .two-col img,
+.project-gallery .three-col img {
+  width: 100%;
+  height: auto;
+  display: block;
+  object-fit: cover;
+  border-radius: 1.5rem;
+}
+
+/* Device mockup support (Base Create project) */
+.project-gallery .device-mockup {
+  position: relative;
+  width: 100%;
+  max-width: 80%;
+  margin: 2rem auto;
+}
+
+.project-gallery .device-mockup .device-screen video {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.project-gallery .device-mockup .device-frame {
+  display: none;
+}
+
+/* Mobile: stack multi-col grids */
+@media (max-width: 639px) {
+  .project-gallery .two-col,
+  .project-gallery .three-col {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── NEXT PROJECT PREVIEW (mouse-following thumbnail) ────────────── */
+.next-project {
+  position: relative;
+}
+
+.next-project__link {
+  transition: opacity 0.4s var(--power-2-ease-out);
+}
+
+@media (hover: hover) {
+  .next-project__link:hover {
+    opacity: 0.6;
+  }
+  .next-project__link {
+    cursor: none;
+  }
+}
+
+.next-project__preview {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 40;
+  pointer-events: none;
+  will-change: transform;
+}
+
+.next-project__preview-inner {
+  width: 5.5vw;
+  height: 4.125vw;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  transform: scale(0);
+  transform-origin: center center;
+  transition: transform 0.5s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+.next-project__preview.--active .next-project__preview-inner {
+  transform: scale(1);
+}
+
+.next-project__preview-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transform: scale(1.15);
+  transition: opacity 0.5s cubic-bezier(0.5, 0, 0.25, 1),
+              transform 0.7s cubic-bezier(0.5, 0, 0.25, 1);
+}
+
+.next-project__preview.--active .next-project__preview-img {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* Hide preview on touch devices */
+@media (hover: none) {
+  .next-project__preview {
+    display: none;
+  }
+}
+
+/* ── LENIS ────────────────────────────────────────────────────────── */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
