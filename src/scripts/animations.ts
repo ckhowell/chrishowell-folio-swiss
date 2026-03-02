@@ -470,15 +470,20 @@ function initNextProjectPreview() {
   if (!window.matchMedia('(hover: hover)').matches) return;
 
   const section = document.querySelector('.next-project') as HTMLElement;
-  const link = document.querySelector('.next-project__link') as HTMLElement;
+  const links = Array.from(
+    document.querySelectorAll('.next-project__link[data-preview-src]')
+  ) as HTMLElement[];
   const preview = document.querySelector('.next-project__preview') as HTMLElement;
-  if (!section || !link || !preview) return;
+  const previewImg = preview?.querySelector(
+    '.next-project__preview-img'
+  ) as HTMLImageElement | null;
+  if (!section || links.length === 0 || !preview || !previewImg) return;
 
   let mouseX = 0;
   let mouseY = 0;
   let previewX = 0;
   let previewY = 0;
-  let isHovering = false;
+  let activeLink: HTMLElement | null = null;
   let tickerCallback: (() => void) | null = null;
 
   // Offset so image appears beside cursor, not centered on it
@@ -491,45 +496,52 @@ function initNextProjectPreview() {
     mouseY = e.clientY;
   });
 
-  link.addEventListener('mouseenter', () => {
-    isHovering = true;
-    preview.classList.add('--active');
+  links.forEach((link) => {
+    link.addEventListener('mouseenter', () => {
+      activeLink = link;
 
-    // Start GSAP ticker for smooth following
-    if (!tickerCallback) {
-      tickerCallback = () => {
-        const dt = 1.0 - Math.pow(0.85, gsap.ticker.deltaRatio());
-
-        previewX += (mouseX - previewX) * dt;
-        previewY += (mouseY - previewY) * dt;
-
-        // Velocity-based rotation (horizontal speed → subtle tilt)
-        const vx = mouseX - previewX;
-        const rotation = vx * 0.08;
-
-        gsap.set(preview, {
-          x: previewX + offsetX,
-          y: previewY + offsetY,
-          rotation: rotation,
-        });
-      };
-      gsap.ticker.add(tickerCallback);
-      nextProjectTickerCallback = tickerCallback;
-    }
-  });
-
-  link.addEventListener('mouseleave', () => {
-    isHovering = false;
-    preview.classList.remove('--active');
-
-    // Remove ticker after transition completes
-    setTimeout(() => {
-      if (!isHovering && tickerCallback) {
-        gsap.ticker.remove(tickerCallback);
-        tickerCallback = null;
-        nextProjectTickerCallback = null;
+      const nextSrc = link.dataset.previewSrc;
+      if (nextSrc && previewImg.src !== nextSrc) {
+        previewImg.src = nextSrc;
       }
-    }, 600);
+
+      preview.classList.add('--active');
+
+      if (!tickerCallback) {
+        tickerCallback = () => {
+          const dt = 1.0 - Math.pow(0.85, gsap.ticker.deltaRatio());
+
+          previewX += (mouseX - previewX) * dt;
+          previewY += (mouseY - previewY) * dt;
+
+          const vx = mouseX - previewX;
+          const rotation = vx * 0.08;
+
+          gsap.set(preview, {
+            x: previewX + offsetX,
+            y: previewY + offsetY,
+            rotation,
+          });
+        };
+        gsap.ticker.add(tickerCallback);
+        nextProjectTickerCallback = tickerCallback;
+      }
+    });
+
+    link.addEventListener('mouseleave', () => {
+      if (activeLink === link) {
+        activeLink = null;
+        preview.classList.remove('--active');
+      }
+
+      setTimeout(() => {
+        if (!activeLink && tickerCallback) {
+          gsap.ticker.remove(tickerCallback);
+          tickerCallback = null;
+          nextProjectTickerCallback = null;
+        }
+      }, 600);
+    });
   });
 
   // Snap position on first enter to avoid flying in from corner

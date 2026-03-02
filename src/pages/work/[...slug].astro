@@ -15,7 +15,7 @@ const { Content } = await project.render();
 const { title, client, description, year, services, contribution, agency } =
   project.data;
 
-// Next project navigation (cycle through featured projects)
+// Featured projects list for footer navigation
 const allProjects = await getCollection('projects');
 const sorted = allProjects
   .filter((p) => p.data.isFeatured)
@@ -24,10 +24,11 @@ const sorted = allProjects
       new Date(b.data.publishDate).getTime() -
       new Date(a.data.publishDate).getTime()
   );
-const currentIndex = sorted.findIndex((p) => p.slug === project.slug);
-const nextProject = currentIndex >= 0
-  ? sorted[(currentIndex + 1) % sorted.length]
-  : sorted[0];
+const getPreviewImage = (item: (typeof sorted)[number]) =>
+  item.data.hoverimage ??
+  (Array.isArray(item.data.image) ? item.data.image[0] : item.data.image);
+const firstPreviewItem = sorted.find((item) => item.slug !== project.slug) ?? sorted[0];
+const firstPreviewImage = firstPreviewItem ? getPreviewImage(firstPreviewItem) : '';
 import ProjectSection from '../../components/mdx/ProjectSection.astro';
 import ProjectMedia from '../../components/mdx/ProjectMedia.astro';
 import ProjectText from '../../components/mdx/ProjectText.astro';
@@ -104,42 +105,43 @@ const components = {
   </section>
 
   <!-- Next project -->
-  {nextProject && (() => {
-    const nextImg = typeof nextProject.data.image === 'string'
-      ? nextProject.data.image
-      : nextProject.data.image[0];
-    return (
-      <section class="next-project border-t-1 border-black/20 pt-48 s:pt-80 pb-64 s:pb-120">
-        <div class="-container -grid">
-          <div class="col-span-full s:col-span-5">
-            <p
-              class="text-xs uppercase tracking-wide opacity-50 mb-8"
-              data-animation="paragraph"
-            >
-              Next Project
-            </p>
-            <a
-              href={`/work/${nextProject.slug}`}
-              class="next-project__link text-h5 s:text-h5 font-medium block"
-              data-animation="title"
-            >
-              {nextProject.data.title}
-            </a>
+  {sorted.length > 0 && (
+    <section class="next-project border-t-1 border-black/20 pt-48 s:pt-80 pb-64 s:pb-120">
+      <div class="-container -grid">
+        <div class="col-span-full s:col-span-5 s:col-start-8">
+          <p
+            class="text-xs uppercase tracking-wide opacity-50 mb-8"
+            data-animation="paragraph"
+          >
+            All Projects
+          </p>
+          <div class="space-y-8">
+            {sorted
+              .filter((item) => item.slug !== project.slug)
+              .map((item) => (
+                <a
+                  href={`/work/${item.slug}`}
+                  class="next-project__link text-h5 s:text-h5 font-medium block"
+                  data-preview-src={getPreviewImage(item)}
+                  data-animation="title"
+                >
+                  {item.data.title}
+                </a>
+            ))}
           </div>
         </div>
-
-        <!-- Mouse-following preview thumbnail -->
         <div class="next-project__preview" aria-hidden="true">
           <div class="next-project__preview-inner">
-            <img
-              class="next-project__preview-img"
-              src={nextImg}
-              alt=""
-              loading="lazy"
-            />
+            {firstPreviewImage && (
+              <img
+                class="next-project__preview-img"
+                src={firstPreviewImage}
+                alt=""
+              />
+            )}
           </div>
         </div>
-      </section>
-    );
-  })()}
+      </div>
+    </section>
+  )}
 </BaseLayout>

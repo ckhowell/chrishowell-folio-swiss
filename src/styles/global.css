@@ -467,8 +467,8 @@
 }
 
 .next-project__preview-inner {
-  width: 5.5vw;
-  height: 4.125vw;
+  width: 22vw;
+  height: 16.5vw;
   border-radius: 0.75rem;
   overflow: hidden;
   transform: scale(0);
@@ -491,7 +491,7 @@
 }
 
 .next-project__preview.--active .next-project__preview-img {
-  opacity: 1;
+  opacity: 0.78;
   transform: scale(1);
 }
 
