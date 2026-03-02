@@ -1,0 +1,59 @@
+---
+interface Props {
+    colSpan?: number | string;
+    colStart?: number | string;
+    imageSrc: string;
+    alt?: string;
+    className?: string;
+}
+
+const { colSpan, colStart, imageSrc, alt = "", className = "" } = Astro.props;
+
+// Tailwind JIT compiler cannot parse dynamic string interpolation like `s:col-span-${colSpan}`.
+// Creating explicit maps so the classes exist in the source code.
+const spanClasses: Record<string | number, string> = {
+    1: "s:col-span-1",
+    2: "s:col-span-2",
+    3: "s:col-span-3",
+    4: "s:col-span-4",
+    5: "s:col-span-5",
+    6: "s:col-span-6",
+    7: "s:col-span-7",
+    8: "s:col-span-8",
+    9: "s:col-span-9",
+    10: "s:col-span-10",
+    11: "s:col-span-11",
+    12: "s:col-span-12",
+    13: "s:col-span-13",
+    14: "s:col-span-14",
+    15: "s:col-span-15",
+    16: "s:col-span-16",
+};
+
+const startClasses: Record<string | number, string> = {
+    1: "s:col-start-1",
+    2: "s:col-start-2",
+    3: "s:col-start-3",
+    4: "s:col-start-4",
+    5: "s:col-start-5",
+    6: "s:col-start-6",
+    7: "s:col-start-7",
+    8: "s:col-start-8",
+    9: "s:col-start-9",
+    10: "s:col-start-10",
+    11: "s:col-start-11",
+    12: "s:col-start-12",
+    13: "s:col-start-13",
+};
+
+// Default to full width on all breakpoints if no colSpan specified
+const desktopSpan = colSpan ? (spanClasses[colSpan] || "s:col-span-full") : "s:col-span-full";
+let gridClasses = `col-span-full ${desktopSpan}`;
+if (colStart && startClasses[colStart]) {
+    gridClasses += ` ${startClasses[colStart]}`;
+}
+---
+
+<div class={`project-media overflow-hidden rounded-2xl w-full ${gridClasses} ${className}`}>
+    <img src={imageSrc} alt={alt} class="w-full h-auto object-cover block" loading="lazy" />
+</div>

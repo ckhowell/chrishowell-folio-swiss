@@ -1,0 +1,12 @@
+---
+interface Props {
+    className?: string;
+    margin?: string;
+}
+
+const { className = "", margin = "my-20 s:my-40" } = Astro.props;
+---
+
+<section class={`project-section -container -grid w-full ${margin} ${className}`}>
+    <slot />
+</section>

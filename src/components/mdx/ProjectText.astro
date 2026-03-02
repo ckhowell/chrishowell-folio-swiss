@@ -1,0 +1,62 @@
+---
+interface Props {
+    colSpan?: number | string;
+    colStart?: number | string;
+    heading?: string;
+    headingClass?: string;
+    className?: string;
+}
+
+const { colSpan = 6, colStart, heading, headingClass = "h6", className = "" } = Astro.props;
+
+const spanClasses: Record<string | number, string> = {
+    1: "s:col-span-1",
+    2: "s:col-span-2",
+    3: "s:col-span-3",
+    4: "s:col-span-4",
+    5: "s:col-span-5",
+    6: "s:col-span-6",
+    7: "s:col-span-7",
+    8: "s:col-span-8",
+    9: "s:col-span-9",
+    10: "s:col-span-10",
+    11: "s:col-span-11",
+    12: "s:col-span-12",
+    13: "s:col-span-13",
+    14: "s:col-span-14",
+    15: "s:col-span-15",
+    16: "s:col-span-16",
+};
+
+const startClasses: Record<string | number, string> = {
+    1: "s:col-start-1",
+    2: "s:col-start-2",
+    3: "s:col-start-3",
+    4: "s:col-start-4",
+    5: "s:col-start-5",
+    6: "s:col-start-6",
+    7: "s:col-start-7",
+    8: "s:col-start-8",
+    9: "s:col-start-9",
+    10: "s:col-start-10",
+    11: "s:col-start-11",
+    12: "s:col-start-12",
+    13: "s:col-start-13",
+    14: "s:col-start-14",
+    15: "s:col-start-15",
+    16: "s:col-start-16",
+    17: "s:col-start-17",
+};
+
+let gridClasses = `col-span-4 ${spanClasses[colSpan] || "s:col-span-6"}`;
+if (colStart && startClasses[colStart]) {
+    gridClasses += ` ${startClasses[colStart]}`;
+}
+---
+
+<div class={`project-text flex flex-col justify-start py-64 ${gridClasses} ${className}`} data-animation="paragraph">
+    {heading && <h4 class="font-medium text-[1rem] s:text-[1.2rem] m:text-[1rem] leading-tight">{heading}</h4>}
+    <div class="text-base font-medium leading-tight pt-16">
+        <slot />
+    </div>
+</div>

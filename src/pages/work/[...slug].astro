@@ -28,6 +28,15 @@ const currentIndex = sorted.findIndex((p) => p.slug === project.slug);
 const nextProject = currentIndex >= 0
   ? sorted[(currentIndex + 1) % sorted.length]
   : sorted[0];
+import ProjectSection from '../../components/mdx/ProjectSection.astro';
+import ProjectMedia from '../../components/mdx/ProjectMedia.astro';
+import ProjectText from '../../components/mdx/ProjectText.astro';
+
+const components = {
+  ProjectSection,
+  ProjectMedia,
+  ProjectText,
+};
 ---
 
 <BaseLayout title={`${title} | Chris Howell`} bodyClass="work">
@@ -45,17 +54,17 @@ const nextProject = currentIndex >= 0
     <div class="-container -grid">
       <!-- Title -->
       <div class="col-span-full s:col-span-5">
-        <h1
-          class="text-h1 s:text-h2 font-medium"
-          data-animation="title"
+        <h3
+          class="font-medium text-[1rem] s:text-[1.2rem] m:text-[2rem] leading-tight"
+          data-animation="title"    
         >
           {title}
-        </h1>
+        </h3>
       </div>
 
       <!-- Description -->
       {description && (
-        <div class="col-span-full s:col-span-4 s:col-start-7 mt-32 s:mt-0">
+        <div class="col-span-full s:col-span-4 s:col-start-8 mt-32 s:mt-0">
           <p
             class="text-base font-medium leading-tight"
             data-animation="paragraph"
@@ -66,7 +75,7 @@ const nextProject = currentIndex >= 0
       )}
 
       <!-- Details column -->
-      <div class="col-span-full s:col-span-3 s:col-start-12 mt-32 s:mt-0 space-y-16">
+      <div class="col-span-full s:col-span-3 s:col-start-13 mt-32 s:mt-0 space-y-16">
         {year && (
           <div data-animation="paragraph">
             <p class="text-xs uppercase tracking-wide opacity-50">Year</p>
@@ -89,11 +98,9 @@ const nextProject = currentIndex >= 0
     </div>
   </section>
 
-  <!-- Project images (rendered markdown body) -->
-  <section class="project-gallery pb-64 s:pb-120">
-    <div class="-container">
-      <Content />
-    </div>
+  <!-- Project images (rendered markdown/MDX body) -->
+  <section class="project-media overflow-hidden rounded-2xl w-full col-span-full s:col-span-17 ">
+    <Content components={components} />
   </section>
 
   <!-- Next project -->
@@ -113,7 +120,7 @@ const nextProject = currentIndex >= 0
             </p>
             <a
               href={`/work/${nextProject.slug}`}
-              class="next-project__link text-h1 s:text-h2 font-medium block"
+              class="next-project__link text-h5 s:text-h5 font-medium block"
               data-animation="title"
             >
               {nextProject.data.title}

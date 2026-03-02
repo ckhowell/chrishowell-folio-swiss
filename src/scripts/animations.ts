@@ -1,8 +1,9 @@
 import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
 // ── LENIS SMOOTH SCROLL ─────────────────────────────────────────────
 const lenis = new Lenis({
@@ -18,8 +19,7 @@ gsap.ticker.add((time) => {
 });
 gsap.ticker.lagSmoothing(0);
 
-// ── PARAGRAPH REVEAL ANIMATIONS ─────────────────────────────────────
-// Fade-up reveal for text elements
+// ── PARAGRAPH REVEAL — SplitText line-by-line mask ──────────────────
 function initParagraphAnimations() {
   const elements = document.querySelectorAll(
     '[data-animation="paragraph"]:not(.--is-visible)'
@@ -32,18 +32,38 @@ function initParagraphAnimations() {
           const el = entry.target as HTMLElement;
           const delay = parseFloat(el.dataset.animationDelay || '0');
 
-          gsap.fromTo(
-            el,
-            { y: 260, opacity: 0, visibility: 'visible' },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 0.8,
-              delay,
-              ease: 'power3.out',
-              onStart: () => el.classList.add('--is-visible'),
-            }
-          );
+          el.classList.add('--is-visible');
+          el.style.visibility = 'visible';
+
+          const isDestabilize = el.classList.contains('hover-destabilize');
+
+          new SplitText(el, {
+            type: isDestabilize ? 'lines, words, chars' : 'lines, words',
+            autoSplit: true,
+            mask: 'lines',
+            linesClass: 'line',
+            charsClass: isDestabilize ? 'char destabilize-char' : undefined,
+            onSplit: (self: any) => {
+              if (isDestabilize && self.chars) {
+                self.chars.forEach((char: HTMLElement) => {
+                  const rx = (Math.random() - 0.5) * 0.75; // -0.375 to 0.375 px (95% reduction of 15px)
+                  const ry = (Math.random() - 0.5) * 1;
+                  const rrot = (Math.random() - 1.5) * 5.0; // -0.5 to 0.5 deg (95% reduction of 20deg)
+                  char.style.setProperty('--dx', `${rx}px`);
+                  char.style.setProperty('--dy', `${ry}px`);
+                  char.style.setProperty('--drot', `${rrot}deg`);
+                });
+              }
+
+              return gsap.from(self.lines, {
+                duration: 0.9,
+                yPercent: 105,
+                stagger: 0.04,
+                delay,
+                ease: 'expo.out',
+              });
+            },
+          });
 
           observer.unobserve(el);
         }
@@ -55,7 +75,7 @@ function initParagraphAnimations() {
   elements.forEach((el) => observer.observe(el));
 }
 
-// ── TITLE REVEAL ANIMATIONS ─────────────────────────────────────────
+// ── TITLE REVEAL — SplitText character-by-character mask ────────────
 function initTitleAnimations() {
   const elements = document.querySelectorAll(
     '[data-animation="title"]:not(.--is-visible), [data-animation="title-in"]:not(.--is-visible)'
@@ -67,17 +87,24 @@ function initTitleAnimations() {
         if (entry.isIntersecting) {
           const el = entry.target as HTMLElement;
 
-          gsap.fromTo(
-            el,
-            { y: 240, opacity: 0, visibility: 'visible' },
-            {
-              y: 0,
-              opacity: 1,
-              duration: 1,
-              ease: 'power4.out',
-              onStart: () => el.classList.add('--is-visible'),
-            }
-          );
+          el.classList.add('--is-visible');
+          el.style.visibility = 'visible';
+
+          new SplitText(el, {
+            type: 'words, chars',
+            autoSplit: true,
+            mask: 'chars',
+            charsClass: 'char',
+            onSplit: (self: any) => {
+              return gsap.from(self.chars, {
+                duration: 1,
+                yPercent: -120,
+                scale: 1.2,
+                stagger: 0.01,
+                ease: 'expo.out',
+              });
+            },
+          });
 
           observer.unobserve(el);
         }
@@ -89,38 +116,33 @@ function initTitleAnimations() {
   elements.forEach((el) => observer.observe(el));
 }
 
-// ── MEDIA REVEAL ANIMATIONS ─────────────────────────────────────────
-function initMediaAnimations() {
-  const elements = document.querySelectorAll(
-    '[data-animation="media"]:not(.--is-visible)'
-  );
+// ── GALLERY IMAGE REVEAL — Staggered fade-up ────────────────────────
+function initGalleryAnimations() {
+  const galleries = document.querySelectorAll('.project-gallery');
+  if (!galleries.length) return;
 
-  const observer = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          const el = entry.target as HTMLElement;
+  galleries.forEach((gallery) => {
+    const images = gallery.querySelectorAll('img');
+    if (!images.length) return;
 
-          gsap.fromTo(
-            el,
-            { opacity: 0, y: 30 },
-            {
-              opacity: 1,
-              y: 0,
-              duration: 1,
-              ease: 'power2.out',
-              onStart: () => el.classList.add('--is-visible'),
-            }
-          );
+    images.forEach((img) => {
+      gsap.set(img, { autoAlpha: 0, yPercent: 15 });
 
-          observer.unobserve(el);
-        }
+      ScrollTrigger.create({
+        trigger: img,
+        start: 'top 90%',
+        once: true,
+        onEnter: () => {
+          gsap.to(img, {
+            yPercent: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            ease: 'power3.out',
+          });
+        },
       });
-    },
-    { threshold: 0.05 }
-  );
-
-  elements.forEach((el) => observer.observe(el));
+    });
+  });
 }
 
 // ── OPACITY-IN ANIMATIONS (CSS transition based) ─────────────────────
@@ -341,57 +363,72 @@ function initProjectHoverEffects() {
   const titles = document.querySelectorAll('.projects-titles .projects__title');
   const colorOverlay = document.querySelector('.color-overlay') as HTMLElement;
 
-  items.forEach((item) => {
-    const link = item.querySelector('.projects__link') as HTMLElement;
-    if (!link) return;
+  // Shared activate/deactivate helpers
+  function activateProject(index: string) {
+    const item = hoverGroup!.querySelector(`.projects__item[data-project-index="${index}"]`);
+    const link = item?.querySelector('.projects__link') as HTMLElement;
 
-    const index = item.getAttribute('data-project-index');
-
-    link.addEventListener('mouseenter', () => {
-      // Add --no-hover to ALL items, then swap hovered one
-      items.forEach((li) => {
-        li.classList.add('--no-hover');
-        li.classList.remove('--hover');
-      });
+    // Add --no-hover to ALL items, then swap hovered one
+    items.forEach((li) => {
+      li.classList.add('--no-hover');
+      li.classList.remove('--hover');
+    });
+    if (item) {
       item.classList.remove('--no-hover');
       item.classList.add('--hover');
+    }
 
-      // Background color overlay
-      if (colorOverlay) {
-        const bgColor = link.dataset.backgroundColor;
-        if (bgColor) {
-          colorOverlay.style.backgroundColor = bgColor;
-          colorOverlay.classList.add('--active');
-        }
+    // Background color overlay
+    if (colorOverlay && link) {
+      const bgColor = link.dataset.backgroundColor;
+      if (bgColor) {
+        colorOverlay.style.backgroundColor = bgColor;
+        colorOverlay.classList.add('--active');
       }
+    }
 
-      // Right-column title highlight
-      titles.forEach((t) => t.classList.remove('--is-active'));
-      const match = document.querySelector(
-        `.projects-titles .projects__title[data-project-index="${index}"]`
-      );
-      if (match) match.classList.add('--is-active');
+    // Right-column title highlight
+    titles.forEach((t) => t.classList.remove('--is-active'));
+    const match = document.querySelector(
+      `.projects-titles .projects__title[data-project-index="${index}"]`
+    );
+    if (match) match.classList.add('--is-active');
+  }
+
+  function deactivateAll() {
+    items.forEach((li) => {
+      li.classList.remove('--no-hover');
+      li.classList.remove('--hover');
     });
 
-    link.addEventListener('mouseleave', () => {
-      // Remove all hover states
-      items.forEach((li) => {
-        li.classList.remove('--no-hover');
-        li.classList.remove('--hover');
-      });
+    if (colorOverlay) {
+      colorOverlay.classList.remove('--active');
+      colorOverlay.removeAttribute('style');
+    }
 
-      // Remove color overlay
-      if (colorOverlay) {
-        colorOverlay.classList.remove('--active');
-        colorOverlay.removeAttribute('style');
-      }
+    titles.forEach((t) => t.classList.remove('--is-active'));
+  }
 
-      // Remove title highlight
-      titles.forEach((t) => t.classList.remove('--is-active'));
-    });
+  // ── Image thumb hover ──
+  items.forEach((item) => {
+    const thumb = item.querySelector('.projects__thumb') as HTMLElement;
+    if (!thumb) return;
+
+    const index = item.getAttribute('data-project-index') || '';
+
+    thumb.addEventListener('mouseenter', () => activateProject(index));
+    thumb.addEventListener('mouseleave', () => deactivateAll());
+  });
+
+  // ── Right-column title hover ──
+  titles.forEach((title) => {
+    const index = title.getAttribute('data-project-index') || '';
+
+    title.addEventListener('mouseenter', () => activateProject(index));
+
+    title.addEventListener('mouseleave', () => deactivateAll());
   });
 }
-
 // ── NEXT PROJECT PREVIEW — Mouse-following thumbnail on hover ────────
 function initNextProjectPreview() {
   if (!window.matchMedia('(hover: hover)').matches) return;
@@ -467,7 +504,7 @@ function initNextProjectPreview() {
 // ── INITIALIZE ───────────────────────────────────────────────────────
 initParagraphAnimations();
 initTitleAnimations();
-initMediaAnimations();
+initGalleryAnimations();
 initOpaInAnimations();
 initCustomCursor();
 initPillHover();

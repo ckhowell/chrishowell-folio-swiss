@@ -3,36 +3,28 @@ export interface Props {
   currentPage?: string;
 }
 
-const { currentPage = '' } = Astro.props;
-const isAboutPage = currentPage === 'about';
+const { currentPage = "" } = Astro.props;
+const isAboutPage = currentPage === "about";
 ---
 
 <header class="header absolute s:fixed top-0 w-full py-20 z-50">
   <nav class="-container">
     <div class="-grid">
       <div class="col-span-1 s:col-span-2">
-        <a
-          class="header__logo text-[0.925rem] s:text-base font-medium block w-max"
-          href="/"
-          data-animation="paragraph"
-        >
+        <a class="header__logo hover-symbol-link text-[0.925rem] s:text-base font-medium block w-max" href="/" data-animation="paragraph">
           C<span class="s:inline-block hidden">hris Howell</span>
         </a>
       </div>
-      <div class="col-span-3 s:col-span-4 s:col-start-11">
-        {!isAboutPage ? (
-          <a
-            class="header__link block text-[0.925rem] s:text-base w-max font-medium"
-            href="/about"
-            data-animation="paragraph"
-          >
-            About
-          </a>
-        ) : (
-          <span class="block text-[0.925rem] s:text-base w-max font-medium opacity-0 pointer-events-none">
-            About
-          </span>
-        )}
+      <div class="col-span-3 s:col-span-4 s:col-start-8">
+        {
+          !isAboutPage ? (
+            <a class="header__link hover-symbol-link block text-[0.925rem] s:text-base w-max font-medium" href="/about" data-animation="paragraph">
+              About
+            </a>
+          ) : (
+            <span class="block text-[0.925rem] s:text-base w-max font-medium opacity-0 pointer-events-none">About</span>
+          )
+        }
       </div>
     </div>
   </nav>
