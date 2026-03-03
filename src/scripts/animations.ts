@@ -11,36 +11,55 @@ declare global {
   }
 }
 
+// ── STATE VARIABLES ─────────────────────────
+// Smooth scroll instance (Lenis)
 let lenis: Lenis | null = null;
+// Intersection Observers for triggering animations as elements enter viewport
 let paragraphObserver: IntersectionObserver | null = null;
 let titleObserver: IntersectionObserver | null = null;
 let opaObserver: IntersectionObserver | null = null;
+// Off-screen element used to measure text width for the cursor "pill" hover effect
 let pillMeasureEl: HTMLSpanElement | null = null;
+// Holds the reference to the ticker callback for the "Next Project" preview animation
 let nextProjectTickerCallback: (() => void) | null = null;
 
+/**
+ * Utility: Check if the user has requested reduced motion at the OS level.
+ * We use this to disable complex animations and smooth scrolling if needed.
+ */
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
+/**
+ * Core Initialization: Runs only once when the site is first loaded.
+ * Sets up global features like Smooth Scrolling and the Custom Cursor.
+ */
 export function initSiteOnce() {
+  // Guard to prevent multiple initializations (e.g., during Astro View Transitions)
   if (window.__chSiteInited) return;
   window.__chSiteInited = true;
 
+  // Initialize Smooth Scrolling (Lenis) if motion is enabled
   if (!prefersReducedMotion()) {
     lenis = new Lenis({
-      duration: 1.2,
-      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      duration: 1.2, // Scroll speed/timing
+      easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)), // Custom easing curve
       touchMultiplier: 2,
     });
 
+    // Link Lenis scroll events to GSAP ScrollTrigger so they stay in sync
     lenis.on('scroll', ScrollTrigger.update);
 
+    // Use GSAP's high-performance ticker to drive the Lenis scroll animation
     gsap.ticker.add((time) => {
       lenis?.raf(time * 1000);
     });
+    // Required to prevent scroll "jumps" during frame drops
     gsap.ticker.lagSmoothing(0);
   }
 
+  // Setup the custom mouse cursor
   initCustomCursorOnce();
 }
 
@@ -569,6 +588,68 @@ export function cleanupPage() {
   ScrollTrigger.getAll().forEach((t) => t.kill());
 }
 
+// ── HEADER SCROLL TRANSITION (Homepage only) ─────────────────────────
+// This function handles the "transformation" of the logo into the back-circle button
+// as the user scrolls down the page.
+function initHeaderScrollAnimation() {
+  // Only execute this on the homepage
+  const body = document.body;
+  if (!body.classList.contains('home')) return;
+
+  const header = document.querySelector('.header');
+  const logo = header?.querySelector('.header__logo') as HTMLElement;
+  const backBtn = header?.querySelector('.header__back') as HTMLElement;
+
+  if (!logo || !backBtn) return;
+
+  // 1. Initial State: Hide the back button and prepare its position
+  gsap.set(backBtn, {
+    opacity: 0,
+    scale: 0.5,
+    x: -20, // Offset it slightly to the left so it "slides" in
+    pointerEvents: 'none'
+  });
+
+  // 2. Create the ScrollTrigger Timeline
+  // This timeline is linked to the scroll position of the body
+  const tl = gsap.timeline({
+    scrollTrigger: {
+      trigger: 'body',
+      start: 'top -50px',   // Animation starts when scrolled 50px down
+      end: 'top -150px',    // Animation finishes when scrolled 150px down
+      scrub: 1,             // Smoothly ties the animation progress to scroll (1s lag for smoothness)
+    }
+  });
+
+  // 3. Animation: Fade and move the Logo OUT
+  tl.to(logo, {
+    opacity: 0,
+    x: 20,                  // Slide it to the right
+    scale: 0.9,
+    filter: 'blur(4px)',    // Add a blur effect for a "vanishing" feel
+    duration: 1,
+    ease: 'power2.inOut'
+  }, 0); // Start at the beginning of the timeline (timestamp 0)
+
+  // 4. Animation: Fade and scale the Back Button IN
+  tl.to(backBtn, {
+    opacity: 1,
+    scale: 1,
+    x: 0,                   // Move back to original grid position
+    duration: 1,
+    ease: 'power2.inOut',
+    // Toggle pointer events so the button is only clickable when visible
+    onStart: () => {
+      backBtn.style.pointerEvents = 'auto';
+      backBtn.classList.remove('opacity-0', 'pointer-events-none');
+    },
+    onReverseComplete: () => {
+      backBtn.style.pointerEvents = 'none';
+      backBtn.classList.add('opacity-0', 'pointer-events-none');
+    }
+  }, 0.2); // Start slightly after the logo starts fading (staggered feel)
+}
+
 export function initPage() {
   cleanupPage();
 
@@ -580,6 +661,7 @@ export function initPage() {
   initPillHover();
   initProjectHoverEffects();
   initNextProjectPreview();
+  initHeaderScrollAnimation(); // <─── Initialize the header transition here
 
   ScrollTrigger.refresh();
 }

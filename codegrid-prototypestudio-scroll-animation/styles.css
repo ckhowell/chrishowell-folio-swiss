@@ -1,0 +1,122 @@
+@import url("https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&display=swap");
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Google Sans", sans-serif;
+  background-color: #141414;
+  color: #fff;
+}
+
+img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+
+h1 {
+  text-transform: uppercase;
+  font-size: clamp(3rem, 5vw, 7rem);
+  font-weight: 400;
+  line-height: 1;
+}
+
+p {
+  font-size: 1.5rem;
+  font-weight: 500;
+  line-height: 1.25;
+}
+
+section {
+  position: relative;
+  width: 100%;
+  height: 100vh;
+  height: 100svh;
+  padding: 2rem;
+  overflow: hidden;
+  -webkit-overflow-scrolling: touch; /* Better scrolling for Safari mobile */
+}
+
+
+.intro,
+.outro {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.project-images {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateZ(0); /* Hardware acceleration */
+  width: 35%;
+  padding: 50vh 0;
+  padding: 50svh 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  z-index: 1; /* Changed from -1 to 1 for better Safari support */
+}
+
+
+.project-img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  opacity: 0.5;
+  transition: opacity 0.3s ease; /* Optimized transition */
+  overflow: hidden;
+  transform: translateZ(0);
+}
+
+
+.project-index {
+  position: absolute;
+  top: 2rem;
+  left: 2rem;
+  z-index: 10;
+}
+
+.project-names {
+  position: absolute;
+  right: 2rem;
+  bottom: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  z-index: 10;
+}
+
+
+.project-names p {
+  color: #4a4a4a;
+  transition: color 0.3s ease;
+  transform: translateZ(0); /* Hardware acceleration */
+}
+
+
+.project-index h1,
+.project-images,
+.project-names p {
+  will-change: transform;
+}
+
+@media (max-width: 1000px) {
+  .project-images {
+    width: calc(100% - 4rem);
+    gap: 25vh;
+    gap: 25svh;
+  }
+
+
+  .project-names p {
+    color: #fff !important;
+  }
+}

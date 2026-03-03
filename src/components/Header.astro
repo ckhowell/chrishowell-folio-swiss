@@ -11,14 +11,47 @@ const isAboutPage = currentPage === "about";
   <nav class="-container">
     <div class="-grid">
       <div class="col-span-1 s:col-span-2">
-        <a class="header__logo hover-symbol-link text-[0.925rem] s:text-base font-medium block w-max" href="/" data-animation="paragraph">
-          C<span class="s:inline-block hidden">hris Howell</span>
+        <!-- HEADER LOGO: The transition targets this element as the "Chris Howell" text fades out -->
+        <a class="header__logo hover-symbol-link text-[0.925rem] s:text-base font-medium block w-max group" href="/" data-animation="paragraph">
+          {/* LOGO HOVER: This scales the 'C' initial slightly on group hover (the link) */}
+          <span class="inline-block transition-transform duration-300 group-hover:scale-110 group-hover:mr-1">C</span><span class="s:inline-block hidden"
+            >hris Howell</span
+          >
         </a>
       </div>
-      <div class="col-span-3 s:col-span-4 s:col-start-8">
+      <div class="col-span-1 s:col-start-4">
+        {/* HOMEPAGE BACK BUTTON: This starts invisible (opacity-0) and is animated in by GSAP based on scroll position */}
+        <a
+          href="/"
+          aria-label="Back to home"
+          class="header__back group flex h-[1.625rem] w-[1.625rem] items-center justify-center rounded-full bg-black text-white transition-all duration-300 hover:scale-125 hover:bg-neutral-800 hover:shadow-xl opacity-0 pointer-events-none"
+          data-animation="paragraph"
+        >
+          <span class="sr-only">Back</span>
+          <svg
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            class="h-[0.7rem] w-[0.7rem] transition-transform duration-300 group-hover:-translate-x-[2px]"
+            aria-hidden="true"
+          >
+            <path d="M19 12H5"></path>
+            <path d="M12 19l-7-7 7-7"></path>
+          </svg>
+        </a>
+      </div>
+      <div class="col-span-2 s:col-span-4 s:col-start-8">
         {
           !isAboutPage ? (
-            <a class="header__link hover-symbol-link block text-[0.925rem] s:text-base w-max font-medium" href="/about" data-animation="paragraph">
+            <a
+              class="header__link hover-symbol-link block text-[0.925rem] s:text-base w-max font-medium"
+              href="/about"
+              data-animation="paragraph"
+              transition:name="home-about-back"
+            >
               About
             </a>
           ) : (
