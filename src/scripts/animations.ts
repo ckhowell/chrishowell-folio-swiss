@@ -278,7 +278,6 @@ function initPillHover() {
 
   if (!dot || !pill || !pillBg || !textWrap || texts.length < 2) return;
 
-  let tickerTween: gsap.core.Tween | null = null;
   let pillTimeline: gsap.core.Timeline | null = null;
 
   // Hidden measurement container — avoids flash from toggling pill visibility
@@ -286,7 +285,7 @@ function initPillHover() {
     pillMeasureEl = document.createElement('span');
     pillMeasureEl.style.cssText =
       'position:absolute;visibility:hidden;white-space:nowrap;font-size:0.75rem;' +
-      'font-weight:500;text-transform:uppercase;letter-spacing:0.05em;padding-right:2rem;';
+      'font-weight:500;text-transform:uppercase;letter-spacing:0.05em;padding-right:0.5rem;';
     document.body.appendChild(pillMeasureEl);
   }
 
@@ -302,24 +301,14 @@ function initPillHover() {
 
       // Measure via offscreen element — no pill flash
       pillMeasureEl!.textContent = label;
-      const singleWidth = pillMeasureEl!.offsetWidth;
-      const pillWidth = singleWidth + 24;
+      const pillWidth = 56; // 3.5rem to match height for a perfect circle
 
       // Kill any existing animations
       if (pillTimeline) pillTimeline.kill();
-      if (tickerTween) tickerTween.kill();
 
-      // Start ticker IMMEDIATELY (text is invisible, already scrolling)
-      const speed = Math.max(label.length * 0.3, 2);
-      gsap.set(textWrap, { x: 0, opacity: 0 });
-      tickerTween = gsap.to(textWrap, {
-        x: -singleWidth,
-        duration: speed,
-        ease: 'none',
-        repeat: -1,
-      });
+      gsap.set(textWrap, { opacity: 0 });
 
-      // ── Animate pill IN — text is already scrolling when it fades in ──
+      // ── Animate pill IN ──
       pillTimeline = gsap.timeline();
       pillTimeline
         // 1. Shrink the dot
@@ -343,7 +332,7 @@ function initPillHover() {
         .to(
           pillBg,
           {
-            scaleX: 1,
+            scale: 1,
             duration: 0.35,
             ease: 'power3.out',
           },
@@ -364,7 +353,6 @@ function initPillHover() {
     target.addEventListener('mouseleave', () => {
       // Kill running animations
       if (pillTimeline) pillTimeline.kill();
-      if (tickerTween) tickerTween.kill();
 
       // ── Animate pill OUT ──
       pillTimeline = gsap.timeline();
@@ -386,13 +374,11 @@ function initPillHover() {
         .to(
           pillBg,
           {
-            scaleX: 0,
+            scale: 0,
             duration: 0.25,
           },
           '<'
         )
-        // 4. Reset ticker position
-        .set(textWrap, { x: 0 })
         // 5. Bounce the dot back
         .to(
           dot,
@@ -588,66 +574,103 @@ export function cleanupPage() {
   ScrollTrigger.getAll().forEach((t) => t.kill());
 }
 
-// ── HEADER SCROLL TRANSITION (Homepage only) ─────────────────────────
-// This function handles the "transformation" of the logo into the back-circle button
-// as the user scrolls down the page.
-function initHeaderScrollAnimation() {
-  // Only execute this on the homepage
-  const body = document.body;
-  if (!body.classList.contains('home')) return;
+// Header scroll animation removed per user request to keep nav items visible
 
-  const header = document.querySelector('.header');
-  const logo = header?.querySelector('.header__logo') as HTMLElement;
-  const backBtn = header?.querySelector('.header__back') as HTMLElement;
+// ── FEATURED WORK SCROLL ANIMATION ────────────────────────────────────
+function initFeaturedWorkScroll() {
+  const spotlightSection = document.querySelector('.spotlight') as HTMLElement;
+  if (!spotlightSection) return;
 
-  if (!logo || !backBtn) return;
+  const projectIndex = document.querySelector('.project-index h1') as HTMLElement;
+  const projectImgs = document.querySelectorAll('.project-img');
+  const projectImagesContainer = document.querySelector('.project-images') as HTMLElement;
+  const projectNames = document.querySelectorAll('.project-names p');
+  const projectNamesContainer = document.querySelector('.project-names') as HTMLElement;
+  const totalProjectCount = projectNames.length;
 
-  // 1. Initial State: Hide the back button and prepare its position
-  gsap.set(backBtn, {
-    opacity: 0,
-    scale: 0.5,
-    x: -20, // Offset it slightly to the left so it "slides" in
-    pointerEvents: 'none'
-  });
+  if (!projectIndex || !projectImagesContainer || !projectNamesContainer || totalProjectCount === 0) return;
 
-  // 2. Create the ScrollTrigger Timeline
-  // This timeline is linked to the scroll position of the body
-  const tl = gsap.timeline({
-    scrollTrigger: {
-      trigger: 'body',
-      start: 'top -50px',   // Animation starts when scrolled 50px down
-      end: 'top -150px',    // Animation finishes when scrolled 150px down
-      scrub: 1,             // Smoothly ties the animation progress to scroll (1s lag for smoothness)
-    }
-  });
+  const spotlightSectionHeight = spotlightSection.offsetHeight;
+  const spotlightSectionPadding = parseFloat(getComputedStyle(spotlightSection).padding);
 
-  // 3. Animation: Fade and move the Logo OUT
-  tl.to(logo, {
-    opacity: 0,
-    x: 20,                  // Slide it to the right
-    scale: 0.9,
-    filter: 'blur(4px)',    // Add a blur effect for a "vanishing" feel
-    duration: 1,
-    ease: 'power2.inOut'
-  }, 0); // Start at the beginning of the timeline (timestamp 0)
+  // Calculate dynamic header height offset so project names stop below the header
+  const header = document.querySelector('.header') as HTMLElement;
+  const headerHeight = header ? header.offsetHeight : 80; // fallback to 80px if header not found
+  const headerOffset = headerHeight + 150; // add 150px visual buffer below header
 
-  // 4. Animation: Fade and scale the Back Button IN
-  tl.to(backBtn, {
-    opacity: 1,
-    scale: 1,
-    x: 0,                   // Move back to original grid position
-    duration: 1,
-    ease: 'power2.inOut',
-    // Toggle pointer events so the button is only clickable when visible
-    onStart: () => {
-      backBtn.style.pointerEvents = 'auto';
-      backBtn.classList.remove('opacity-0', 'pointer-events-none');
+  const projectIndexHeight = projectIndex.offsetHeight;
+  const containerHeight = projectNamesContainer.offsetHeight;
+  const imagesHeight = projectImagesContainer.offsetHeight;
+
+  const moveDistanceIndex = spotlightSectionHeight - spotlightSectionPadding * 2 - projectIndexHeight;
+  const moveDistanceNames = Math.max(0, window.innerHeight - headerOffset - containerHeight - spotlightSectionPadding);
+
+  const moveDistanceImages = window.innerHeight - imagesHeight;
+
+  const imgActivationThreshold = window.innerHeight / 2;
+
+  ScrollTrigger.create({
+    trigger: '.spotlight',
+    start: 'top top',
+    end: `+=${window.innerHeight * 5}px`,
+    pin: true,
+    pinSpacing: true,
+    scrub: 1,
+    anticipatePin: 1,
+    onUpdate: (self) => {
+      const progress = self.progress;
+
+      // Calculate currentIndex slightly differently.
+      // We want it to be 1 at progress=0, and totalProjectCount at progress=1.
+      const rawIndex = progress * totalProjectCount;
+      // We effectively use Math.floor, but handle the very end (progress=1) carefully.
+      const targetIndex = Math.min(Math.max(1, Math.floor(rawIndex) + 1), totalProjectCount);
+      // Wait, let's just make it simpler so the user sees the active image.
+      // A slightly smoother way to calculate index based on imgActivationThreshold:
+      // When an image crosses the threshold, it becomes the "active" one.
+      // Easiest is to just calculate it directly from the progress, since we distribute names/images evenly.
+      const currentIndex = progress === 1 ? totalProjectCount : Math.floor(progress * totalProjectCount) + 1;
+
+      projectIndex.textContent = `01/${String(currentIndex).padStart(2, '0')}`;
+
+      gsap.set(projectIndex, { y: progress * moveDistanceIndex });
+      gsap.set(projectImagesContainer, { y: progress * moveDistanceImages });
+
+      projectImgs.forEach((img) => {
+        const imgRect = img.getBoundingClientRect();
+        const imgTop = imgRect.top;
+        const imgBottom = imgRect.bottom;
+
+        if (imgTop <= imgActivationThreshold && imgBottom >= imgActivationThreshold) {
+          img.classList.add('is-active');
+        } else {
+          img.classList.remove('is-active');
+        }
+      });
+
+      projectNames.forEach((p, index) => {
+        const pEl = p as HTMLElement;
+        const startProgress = index / totalProjectCount;
+        const endProgress = (index + 1) / totalProjectCount;
+        const projectProgress = Math.max(
+          0,
+          Math.min(1, (progress - startProgress) / (endProgress - startProgress))
+        );
+
+        gsap.set(pEl, { y: -projectProgress * moveDistanceNames });
+
+        if (projectProgress > 0 && projectProgress < 1) {
+          gsap.set(pEl, { color: '#000' });
+        } else {
+          gsap.set(pEl, { color: '#a0a0a0' });
+        }
+      });
     },
-    onReverseComplete: () => {
-      backBtn.style.pointerEvents = 'none';
-      backBtn.classList.add('opacity-0', 'pointer-events-none');
-    }
-  }, 0.2); // Start slightly after the logo starts fading (staggered feel)
+  });
+
+  gsap.set([projectIndex, projectImagesContainer, ...Array.from(projectImgs), ...Array.from(projectNames)], {
+    force3D: true,
+  });
 }
 
 export function initPage() {
@@ -661,7 +684,7 @@ export function initPage() {
   initPillHover();
   initProjectHoverEffects();
   initNextProjectPreview();
-  initHeaderScrollAnimation(); // <─── Initialize the header transition here
+  initFeaturedWorkScroll();
 
   ScrollTrigger.refresh();
 }

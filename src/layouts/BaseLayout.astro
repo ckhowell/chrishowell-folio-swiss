@@ -1,9 +1,9 @@
 ---
-import BaseHead from '../components/BaseHead.astro';
-import Header from '../components/Header.astro';
-import Footer from '../components/Footer.astro';
-import { ClientRouter } from 'astro:transitions';
-import '../styles/global.css';
+import BaseHead from "../components/BaseHead.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { ClientRouter } from "astro:transitions";
+import "../styles/global.css";
 
 export interface Props {
   title: string;
@@ -12,10 +12,10 @@ export interface Props {
   currentPage?: string;
 }
 
-const { title, description, bodyClass = '', currentPage = '' } = Astro.props;
+const { title, description, bodyClass = "", currentPage = "" } = Astro.props;
 ---
 
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <BaseHead title={title} description={description} />
@@ -35,16 +35,20 @@ const { title, description, bodyClass = '', currentPage = '' } = Astro.props;
     <div class="custom-cursor" aria-hidden="true">
       <div class="cursor-dot"></div>
       <div class="cursor-pill">
-        <div class="cursor-pill-bg"></div>
-        <div class="cursor-text-wrap">
+        <div class="cursor-pill-bg">
+          <svg viewBox="0 0 100 100" class="w-full h-full">
+            <circle cx="50" cy="50" r="50" fill="#1a1a1a"></circle>
+          </svg>
+        </div>
+        <div class="cursor-text-wrap absolute inset-0 flex items-center justify-center">
           <span class="cursor-text"></span>
-          <span class="cursor-text cursor-text--dupe"></span>
+          <span class="cursor-text cursor-text--dupe hidden"></span>
         </div>
       </div>
     </div>
 
     <script>
-      import '../scripts/router.ts';
+      import "../scripts/router.ts";
     </script>
   </body>
 </html>

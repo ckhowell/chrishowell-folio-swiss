@@ -219,11 +219,11 @@
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  height: 2rem;
-  border-radius: 3.5em;
+  height: 3.5rem;
   overflow: hidden;
   display: flex;
   align-items: center;
+  justify-content: center;
   width: 0;
   opacity: 0;
 }
@@ -231,9 +231,7 @@
 .cursor-pill-bg {
   position: absolute;
   inset: 0;
-  background: #f7f7f7;
-  border-radius: inherit;
-  transform: scaleX(0);
+  transform: scale(0);
   transform-origin: center;
 }
 
@@ -241,19 +239,18 @@
   display: flex;
   white-space: nowrap;
   position: relative;
-  padding: 0 0.75rem;
+  padding: 0;
   opacity: 0;
 }
 
 .cursor-text {
-  color: #1a1a1a;
-  font-size: 0.75rem;
+  color: #fff;
+  font-size: 0.85rem;
   font-weight: 500;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   white-space: nowrap;
   flex-shrink: 0;
-  padding-right: 2rem;
 }
 
 /* ── COLOR OVERLAY (full-page tint on project hover) ────────────── */
