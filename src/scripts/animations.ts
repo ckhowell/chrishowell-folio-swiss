@@ -584,7 +584,7 @@ function initFeaturedWorkScroll() {
   const projectIndex = document.querySelector('.project-index h1') as HTMLElement;
   const projectImgs = document.querySelectorAll('.project-img');
   const projectImagesContainer = document.querySelector('.project-images') as HTMLElement;
-  const projectNames = document.querySelectorAll('.project-names p');
+  const projectNames = document.querySelectorAll('.project-name-link');
   const projectNamesContainer = document.querySelector('.project-names') as HTMLElement;
   const totalProjectCount = projectNames.length;
 
@@ -607,7 +607,7 @@ function initFeaturedWorkScroll() {
 
   const moveDistanceImages = window.innerHeight - imagesHeight;
 
-  const imgActivationThreshold = window.innerHeight / 2;
+
 
   ScrollTrigger.create({
     trigger: '.spotlight',
@@ -636,20 +636,22 @@ function initFeaturedWorkScroll() {
       gsap.set(projectIndex, { y: progress * moveDistanceIndex });
       gsap.set(projectImagesContainer, { y: progress * moveDistanceImages });
 
-      projectImgs.forEach((img) => {
-        const imgRect = img.getBoundingClientRect();
-        const imgTop = imgRect.top;
-        const imgBottom = imgRect.bottom;
+      // Use progress-based activation instead of getBoundingClientRect
+      // to avoid feedback loops when margin changes shift image positions
+      const imgRawIndex = progress * (totalProjectCount - 1);
+      const activeIndex = Math.round(imgRawIndex);
 
-        if (imgTop <= imgActivationThreshold && imgBottom >= imgActivationThreshold) {
+      projectImgs.forEach((img, index) => {
+        if (index === activeIndex) {
           img.classList.add('is-active');
         } else {
           img.classList.remove('is-active');
         }
       });
 
-      projectNames.forEach((p, index) => {
-        const pEl = p as HTMLElement;
+      projectNames.forEach((link, index) => {
+        const linkEl = link as HTMLElement;
+        const pEl = linkEl.querySelector('p') as HTMLElement;
         const startProgress = index / totalProjectCount;
         const endProgress = (index + 1) / totalProjectCount;
         const projectProgress = Math.max(
@@ -657,12 +659,17 @@ function initFeaturedWorkScroll() {
           Math.min(1, (progress - startProgress) / (endProgress - startProgress))
         );
 
-        gsap.set(pEl, { y: -projectProgress * moveDistanceNames });
+        gsap.set(linkEl, { y: -projectProgress * moveDistanceNames });
+
+        // Find the .project-meta inside this link wrapper
+        const metaEl = linkEl.querySelector('.project-meta');
 
         if (projectProgress > 0 && projectProgress < 1) {
-          gsap.set(pEl, { color: '#000' });
+          if (pEl) gsap.set(pEl, { color: '#000' });
+          metaEl?.classList.add('is-visible');
         } else {
-          gsap.set(pEl, { color: '#a0a0a0' });
+          if (pEl) gsap.set(pEl, { color: '#a0a0a0' });
+          metaEl?.classList.remove('is-visible');
         }
       });
     },
@@ -685,6 +692,12 @@ export function initPage() {
   initProjectHoverEffects();
   initNextProjectPreview();
   initFeaturedWorkScroll();
+
+  // Reset smooth scroll to the top of the page immediately upon routing
+  // to prevent it jumping midway down from the previous scroll state
+  if (lenis) {
+    lenis.scrollTo(0, { immediate: true });
+  }
 
   ScrollTrigger.refresh();
 }

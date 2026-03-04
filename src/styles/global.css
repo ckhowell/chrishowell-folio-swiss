@@ -177,9 +177,11 @@
   will-change: transform;
 }
 
-.hover-destabilize:hover .destabilize-char {
-  animation: jiggleChar 0.2s infinite alternate ease-in-out;
-  animation-delay: calc(var(--dx) * 10ms); /* Randomize start time based on dx value */
+@media (hover: hover) {
+  .hover-destabilize:hover .destabilize-char {
+    animation: jiggleChar 0.2s infinite alternate ease-in-out;
+    animation-delay: calc(var(--dx) * 10ms);
+  }
 }
 
 @keyframes jiggleChar {
@@ -204,6 +206,13 @@
   }
 }
 
+/* Force-hide custom cursor on mobile viewports */
+@media (max-width: 999px) {
+  .custom-cursor {
+    display: none !important;
+  }
+}
+
 /* The always-visible small dot */
 .cursor-dot {
   width: 10px;
@@ -211,6 +220,11 @@
   border-radius: 50%;
   background: #1a1a1a;
   transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+/* Hide dot when hovering navigation symbol links */
+body:has(.hover-symbol-link:hover) .cursor-dot {
+  transform: scale(0);
 }
 
 /* The expanding pill */
@@ -279,30 +293,44 @@
   transition: transform 0.4s var(--power-2-ease-out);
 }
 
-.hover-symbol-link:hover {
-  transform: translateX(1.5ch);
-}
-
 .hover-symbol-link::before {
   content: "";
   position: absolute;
   left: -1.5ch;
-  top: 0;
+  top: 50%;
+  width: 0.8em;
+  height: 0.8em;
+  margin-top: -0.4em;
   opacity: 0;
-  color: inherit;
+  background-color: currentColor;
+  -webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 2v20M3.34 7l17.32 10M20.66 7l-17.32 10'/%3E%3C/svg%3E");
+  -webkit-mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M12 2v20M3.34 7l17.32 10M20.66 7l-17.32 10'/%3E%3C/svg%3E");
+  mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
   transition: opacity 0.4s var(--power-2-ease-out);
   pointer-events: none;
+  transform-origin: center center;
 }
 
-.hover-symbol-link:hover::before {
-  opacity: 1;
-  animation: randomSymbol 1.6s steps(1) infinite;
+/* Only apply hover effects on devices that have a real pointer */
+@media (hover: hover) {
+  .hover-symbol-link:hover {
+    transform: translateX(1.5ch);
+  }
+
+  .hover-symbol-link:hover::before {
+    opacity: 1;
+    animation: rotateSymbol 3s linear infinite;
+  }
 }
 
-@keyframes randomSymbol {
-  0%   { content: ">"; }
-  50%   { content: "•"; }
-
+@keyframes rotateSymbol {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
 /* ── PROJECT ITEM EFFECTS ────────────────────────────────────────── */

@@ -25,7 +25,7 @@ const projectColors: Record<string, string> = {
     /* Keep the height as viewport units for pinning */
     height: 100vh;
     height: 100svh;
-    padding: 2rem;
+    padding: 0;
     overflow: hidden;
     -webkit-overflow-scrolling: touch;
   }
@@ -56,19 +56,23 @@ const projectColors: Record<string, string> = {
       opacity 0.5s cubic-bezier(0.5, 0, 0.25, 1),
       transform 0.5s cubic-bezier(0.5, 0, 0.25, 1),
       box-shadow 0.5s cubic-bezier(0.5, 0, 0.25, 1),
-      border-radius 0.5s cubic-bezier(0.5, 0, 0.25, 1);
+      border-radius 0.5s cubic-bezier(0.5, 0, 0.25, 1),
+      margin 0.7s cubic-bezier(0.16, 1, 0.3, 1);
     overflow: hidden;
     transform: translateZ(0) scale(1);
-    border-radius: 0.5rem;
+    border-radius: 1rem;
     will-change: transform, opacity, box-shadow;
+    margin: 0;
+    border: 0.625rem solid #fff;
   }
 
   .project-img.is-active {
     opacity: 1 !important;
-    transform: scale(1.15) translateZ(0) !important;
-    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.5);
-    border-radius: 1rem;
+    transform: scale(1.13) translateZ(0) !important;
+    box-shadow: 0 40px 70px -20px rgba(0, 0, 0, 0.15);
+    border-radius: 0;
     z-index: 20;
+    margin: 2rem 0;
   }
 
   .project-index {
@@ -107,21 +111,82 @@ const projectColors: Record<string, string> = {
     transform: translateZ(0);
   }
 
+  .project-meta {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.25rem;
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition:
+      max-height 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+      opacity 0.4s ease;
+  }
+
+  .project-meta.is-visible {
+    max-height: 2rem;
+    opacity: 1;
+  }
+
+  .project-meta-pill {
+    display: inline-block;
+    font-size: 0.55rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #555;
+    clip-path: inset(0 100% 0 0);
+    transition: clip-path 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .project-meta.is-visible .project-meta-pill {
+    clip-path: inset(0 0% 0 0);
+  }
+
   .project-index h4,
   .project-images,
   .project-names p {
     will-change: transform;
   }
 
-  @media (max-width: 1000px) {
+  @media (max-width: 999px) {
     .project-images {
-      width: calc(100% - 4rem);
-      gap: 25vh;
-      gap: 25svh;
+      width: 100%;
+      gap: 1.5rem;
+      padding-top: 25svh;
     }
 
     .project-names p {
       color: #000 !important;
+    }
+
+    /* Mobile inline captions under each image */
+    .mobile-caption {
+      display: block;
+      padding: 0.5rem 0 0.75rem;
+    }
+
+    .mobile-caption-title {
+      font-size: 0.8rem;
+      font-weight: 500;
+      line-height: 1.25;
+      color: #1a1a1a;
+    }
+
+    .mobile-caption-meta {
+      font-size: 0.55rem;
+      font-weight: 500;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: #888;
+      margin-top: 0.15rem;
+    }
+  }
+
+  /* Hide mobile captions on desktop */
+  @media (min-width: 1000px) {
+    .mobile-caption {
+      display: none;
     }
   }
 </style>
@@ -142,13 +207,19 @@ const projectColors: Record<string, string> = {
           featured.map((project) => {
             const imgSrc = typeof project.data.image === "string" ? project.data.image : project.data.image[0];
             return (
-              <a
-                href={`/work/${project.slug}`}
-                class="project-img aspect-[16/9] w-full opacity-50 transition-opacity duration-300 overflow-hidden translate-z-0 block"
-                data-cursor-text=">>"
-              >
-                <img src={imgSrc} alt={project.data.title} loading="lazy" class="w-full h-full object-cover block" />
-              </a>
+              <div class="project-card">
+                <a
+                  href={`/work/${project.slug}`}
+                  class="project-img aspect-[16/9] w-full opacity-50 transition-opacity duration-300 overflow-hidden translate-z-0 block"
+                  data-cursor-text=">>"
+                >
+                  <img src={imgSrc} alt={project.data.title} loading="lazy" class="w-full h-full object-cover block" />
+                </a>
+                <div class="mobile-caption">
+                  <p class="mobile-caption-title">{project.data.title}</p>
+                  {project.data.industry && <p class="mobile-caption-meta">{project.data.industry}</p>}
+                </div>
+              </div>
             );
           })
         }
@@ -161,6 +232,9 @@ const projectColors: Record<string, string> = {
             featured.map((project) => (
               <a href={`/work/${project.slug}`} class="block transition-colors hover:text-black project-name-link">
                 <p>{project.data.title}</p>
+                <div class="project-meta" data-industry={project.data.industry}>
+                  <span class="project-meta-pill">{project.data.industry}</span>
+                </div>
               </a>
             ))
           }

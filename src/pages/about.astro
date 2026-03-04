@@ -1,13 +1,9 @@
 ---
-import BaseLayout from '../layouts/BaseLayout.astro';
+import BaseLayout from "../layouts/BaseLayout.astro";
 ---
 
-<BaseLayout
-  title="About | Chris Howell"
-  bodyClass="about"
-  currentPage="about"
->
-  <section class="intro section pt-64 s:pt-160 pb-40 s:pb-100 s:min-h-screen">
+<BaseLayout title="About | Chris Howell" bodyClass="about" currentPage="about">
+  <section class="intro section min-h-[100svh] s:min-h-screen flex flex-col s:block pt-40 s:pt-160 pb-40 s:pb-100">
     <!-- Back link -->
     <a
       href="/"
@@ -26,41 +22,40 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         class="h-[0.7rem] w-[0.7rem] transition-transform duration-300 group-hover:-translate-x-[2px]"
         aria-hidden="true"
       >
-        <path d="M19 12H5" />
-        <path d="M12 19l-7-7 7-7" />
+        <path d="M19 12H5"></path>
+        <path d="M12 19l-7-7 7-7"></path>
       </svg>
     </a>
 
-    <div class="-container -grid s:gap-y-0 gap-y-64">
+    <div class="-container -grid s:gap-y-0 gap-y-64 mt-auto s:mt-0">
       <!-- Title & bio -->
       <div class="col-span-full s:col-span-6 s:col-start-8">
-        <div class="pl-[5.5rem] s:pl-0">
-          <h1
-            class="text-h1 s:text-h2 font-medium mb-32 s:pl-0"
-            data-animation="title"
-          >
-            About
-          </h1>
+        <div class="pl-0 s:pl-0">
+          <h1 class="text-[2.5rem] s:text-h1 s:text-h2 font-medium mb-32 s:pl-0" data-animation="title">About</h1>
         </div>
-        <p
-          class="font-medium text-[1rem] s:text-[1.2rem] m:text-[1rem] leading-tight pb-32"
-          data-animation="paragraph"
-        >
+        <p class="font-medium text-[1rem] s:text-[1.2rem] m:text-[1rem] leading-tight pb-32" data-animation="paragraph">
           <span class="block">
             I am a designer who specialises in structured visual communication and systematic design execution across digital and print mediums.
           </span>
           <span class="block">
-            After founding and running Halfnine Design for nearly 20 years, I’ve built deep expertise across branding, UI/UX, digital content production, and multi-channel campaign execution.
+            After founding and running Halfnine Design for nearly 20 years, I've built deep expertise across branding, UI/UX, digital content production, and
+            multi-channel campaign execution.
           </span>
           <span class="block">
-            My work spans luxury property developments, civic infrastructure, and digital products — all contexts that required precision, stakeholder collaboration, and the ability to deliver consistently within established brand frameworks.
+            My work spans luxury property developments, civic infrastructure, and digital products — all contexts that required precision, stakeholder
+            collaboration, and the ability to deliver consistently within established brand frameworks.
           </span>
           <span class="block">
             I am looking for opportunities in established organisations where design serves clear objectives and systematic execution is valued.
           </span>
         </p>
       </div>
+    </div>
+  </section>
 
+  <!-- Experience & Skills section -->
+  <section class="section pb-40 s:pb-100">
+    <div class="-container -grid s:gap-y-0 gap-y-64">
       <!-- Experience (left) -->
       <div class="col-span-full s:col-span-3 s:col-start-8 pt-32">
         <p class="text-xl font-medium mb-20" data-animation="paragraph">Experience</p>
@@ -99,7 +94,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       </div>
 
       <!-- Skill Set (right) -->
-      <div class="col-span-full s:col-span-5 s:col-start-11 mt-64 s:mt-0 pt-32">
+      <div class="col-span-full s:col-span-5 s:col-start-11 mt-32 s:mt-0 pt-32">
         <p class="text-xl font-medium mb-20" data-animation="paragraph">Skill Set</p>
         <div class="grid grid-cols-1 s:grid-cols-2" data-animation="paragraph">
           <div class="py-16 s:pr-20">
@@ -160,7 +155,6 @@ import BaseLayout from '../layouts/BaseLayout.astro';
           </div>
         </div>
       </div>
-      
     </div>
   </section>
 </BaseLayout>
