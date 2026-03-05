@@ -99,12 +99,76 @@ function onPageLoad() {
   if (main) gsap.set(main, { clearProps: 'opacity,visibility,transform,pointerEvents' });
 }
 
+// ── CLI-STYLE PRELOADER ─────────────────────────────────
+function runPreloader(): Promise<void> {
+  const preloader = document.getElementById('preloader');
+  const barEl = document.getElementById('preloader-bar');
+  const blankEl = document.getElementById('preloader-blank');
+  const percentEl = document.getElementById('preloader-percent');
+
+  // If elements don't exist or already shown this session, skip
+  if (!preloader || !barEl || !blankEl || !percentEl) {
+    return Promise.resolve();
+  }
+
+  if (sessionStorage.getItem('ch_preloader_shown')) {
+    preloader.classList.add('--hidden');
+    return Promise.resolve();
+  }
+
+  return new Promise<void>((resolve) => {
+    const TOTAL = 50;
+    const DURATION = 1800;
+    const start = Date.now();
+
+    function ease(t: number): number {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function update() {
+      const t = Math.min((Date.now() - start) / DURATION, 1);
+      const pct = Math.round(ease(t) * 100);
+      const filled = Math.round((pct / 100) * TOTAL);
+      const empty = TOTAL - filled;
+
+      barEl!.textContent = '='.repeat(filled);
+      barEl!.style.width = ((filled / TOTAL) * 100) + '%';
+      blankEl!.textContent = ' '.repeat(empty);
+      blankEl!.style.width = ((empty / TOTAL) * 100) + '%';
+
+      let s = String(pct);
+      while (s.length < 3) s = '\u00A0' + s;
+      percentEl!.textContent = s + '%';
+
+      if (pct >= 100) {
+        clearInterval(timer);
+        // Brief pause at 100%, then fade out
+        setTimeout(() => {
+          preloader!.classList.add('--done');
+          sessionStorage.setItem('ch_preloader_shown', 'true');
+          setTimeout(() => {
+            preloader!.remove();
+            resolve();
+          }, 600);
+        }, 400);
+      }
+    }
+
+    // setInterval is more reliable than rAF in Safari during page load
+    const timer = setInterval(update, 16);
+    update(); // First frame immediately
+  });
+}
+
 if (!window.__chRouterInited) {
   window.__chRouterInited = true;
 
   document.addEventListener(TRANSITION_BEFORE_PREPARATION, onBeforePreparation);
   document.addEventListener(TRANSITION_PAGE_LOAD, onPageLoad);
 
-  // Initial load (non-transition navigation)
-  onPageLoad();
+  // Initial load: run preloader first, then init page
+  runPreloader().then(() => {
+    onPageLoad();
+  });
 }
+

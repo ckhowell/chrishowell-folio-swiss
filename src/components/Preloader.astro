@@ -1,8 +1,7 @@
 ---
 /**
  * CLI-style progress bar preloader.
- * Uses is:inline + IIFE for immediate execution.
- * setInterval-based for Safari compatibility.
+ * HTML + CSS only — animation driven by router.ts
  */
 ---
 
@@ -18,17 +17,7 @@
     </div>
 </div>
 
-<script is:inline>
-    // Immediately hide if already shown this session
-    (function () {
-        if (sessionStorage.getItem("ch_preloader_shown")) {
-            var el = document.getElementById("preloader");
-            if (el) el.style.display = "none";
-        }
-    })();
-</script>
-
-<style>
+<style is:global>
     .preloader {
         position: fixed;
         inset: 0;
@@ -47,6 +36,10 @@
         opacity: 0;
         visibility: hidden;
         pointer-events: none;
+    }
+
+    .preloader.--hidden {
+        display: none !important;
     }
 
     .preloader__terminal {
@@ -101,60 +94,3 @@
         color: #888;
     }
 </style>
-
-<script is:inline>
-    // Animate the progress bar — runs immediately, no event listeners needed
-    (function () {
-        // Skip if already shown
-        if (sessionStorage.getItem("ch_preloader_shown")) return;
-
-        var preloader = document.getElementById("preloader");
-        var barEl = document.getElementById("preloader-bar");
-        var blankEl = document.getElementById("preloader-blank");
-        var percentEl = document.getElementById("preloader-percent");
-
-        if (!preloader || !barEl || !blankEl || !percentEl) return;
-
-        var TOTAL = 50;
-        var DURATION = 1800;
-        var start = Date.now();
-        var done = false;
-
-        function ease(t) {
-            return 1 - Math.pow(1 - t, 4);
-        }
-
-        function update() {
-            if (done) return;
-            var t = Math.min((Date.now() - start) / DURATION, 1);
-            var pct = Math.round(ease(t) * 100);
-            var filled = Math.round((pct / 100) * TOTAL);
-            var empty = TOTAL - filled;
-
-            barEl.textContent = Array(filled + 1).join("=");
-            barEl.style.width = (filled / TOTAL) * 100 + "%";
-            blankEl.textContent = Array(empty + 1).join(" ");
-            blankEl.style.width = (empty / TOTAL) * 100 + "%";
-
-            var s = String(pct);
-            while (s.length < 3) s = "\u00A0" + s;
-            percentEl.textContent = s + "%";
-
-            if (pct >= 100) {
-                done = true;
-                clearInterval(timer);
-                setTimeout(function () {
-                    preloader.classList.add("--done");
-                    sessionStorage.setItem("ch_preloader_shown", "true");
-                    setTimeout(function () {
-                        preloader.remove();
-                    }, 600);
-                }, 400);
-            }
-        }
-
-        // Use setInterval — more reliable than rAF in Safari during initial page load
-        var timer = setInterval(update, 16);
-        update(); // Run first frame immediately
-    })();
-</script>
