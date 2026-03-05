@@ -22,5 +22,5 @@ pnpm-debug.log*
 
 # jetbrains setting folder
 .idea/
-
-codegrid-prototypestudio-scroll-animation
+.claude/
+codegrid-prototypestudio-scroll-animation/
