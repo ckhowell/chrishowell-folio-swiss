@@ -92,6 +92,13 @@ function onBeforePreparation(ev: Event) {
 }
 
 function onPageLoad() {
+  // After a View Transition, the new page's Preloader HTML reappears in the DOM.
+  // Since we only want it on the very first load, immediately remove it.
+  const preloader = document.getElementById('preloader');
+  if (preloader && sessionStorage.getItem('ch_preloader_shown')) {
+    preloader.remove();
+  }
+
   initSiteOnce();
   initPage();
 
