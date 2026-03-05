@@ -1,7 +1,8 @@
 ---
 /**
  * CLI-style progress bar preloader.
- * HTML + CSS only — animation driven by router.ts
+ * Pure CSS animation — no JavaScript dependency for the visual.
+ * The bar fills via CSS @keyframes, JS only handles cleanup.
  */
 ---
 
@@ -9,15 +10,16 @@
     <div class="preloader__terminal">
         <div class="preloader__line">
             <span class="preloader__bar-wrapper">
-                <span class="preloader__left">|</span><span id="preloader-bar" class="preloader__bar"></span><span id="preloader-blank" class="preloader__blank"
-                ></span><span class="preloader__right">|</span>
+                <span class="preloader__left">|</span>
+                <span class="preloader__fill"></span>
+                <span class="preloader__right">|</span>
             </span>
-            <span id="preloader-percent" class="preloader__percent">&nbsp;&nbsp;0%</span>
         </div>
     </div>
 </div>
 
 <style is:global>
+    /* ── PRELOADER ─────────────────────────────────────────────── */
     .preloader {
         position: fixed;
         inset: 0;
@@ -27,18 +29,11 @@
         align-items: flex-end;
         justify-content: flex-start;
         padding: 2rem;
-        transition:
-            opacity 0.5s ease,
-            visibility 0.5s ease;
+        /* Auto-fade after bar completes: 1.8s animation + 0.4s pause */
+        animation: preloaderFadeOut 0.5s ease 2.2s forwards;
     }
 
-    .preloader.--done {
-        opacity: 0;
-        visibility: hidden;
-        pointer-events: none;
-    }
-
-    .preloader.--hidden {
+    .preloader.--skip {
         display: none !important;
     }
 
@@ -58,10 +53,9 @@
     }
 
     .preloader__bar-wrapper {
-        display: inline-flex;
+        display: flex;
         align-items: center;
-        flex: 1;
-        min-width: 0;
+        width: 100%;
     }
 
     .preloader__left,
@@ -70,27 +64,42 @@
         color: #888;
     }
 
-    .preloader__bar {
-        color: #1a1a1a;
-        overflow: hidden;
-        width: 0%;
-        white-space: nowrap;
-        direction: ltr;
-    }
-
-    .preloader__blank {
-        color: #ccc;
-        overflow: hidden;
+    .preloader__fill {
         flex: 1;
-        white-space: nowrap;
-        direction: ltr;
+        height: 1em;
+        position: relative;
+        overflow: hidden;
     }
 
-    .preloader__percent {
-        flex-shrink: 0;
-        margin-left: 0.75ch;
-        text-align: right;
-        min-width: 4ch;
-        color: #888;
+    .preloader__fill::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 0;
+        height: 100%;
+        width: 0%;
+        background: repeating-linear-gradient(90deg, #1a1a1a 0px, #1a1a1a 0.55em, transparent 0.55em, transparent 0.62em);
+        animation: barFill 1.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+    }
+
+    @keyframes barFill {
+        0% {
+            width: 0%;
+        }
+        100% {
+            width: 100%;
+        }
+    }
+
+    @keyframes preloaderFadeOut {
+        0% {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        100% {
+            opacity: 0;
+            pointer-events: none;
+            visibility: hidden;
+        }
     }
 </style>

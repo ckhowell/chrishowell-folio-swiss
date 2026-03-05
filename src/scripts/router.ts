@@ -99,65 +99,24 @@ function onPageLoad() {
   if (main) gsap.set(main, { clearProps: 'opacity,visibility,transform,pointerEvents' });
 }
 
-// ── CLI-STYLE PRELOADER ─────────────────────────────────
-function runPreloader(): Promise<void> {
+// ── PRELOADER CLEANUP ─────────────────────────────────
+// CSS handles the animation; JS only does cleanup + sessionStorage
+function handlePreloader() {
   const preloader = document.getElementById('preloader');
-  const barEl = document.getElementById('preloader-bar');
-  const blankEl = document.getElementById('preloader-blank');
-  const percentEl = document.getElementById('preloader-percent');
+  if (!preloader) return;
 
-  // If elements don't exist or already shown this session, skip
-  if (!preloader || !barEl || !blankEl || !percentEl) {
-    return Promise.resolve();
-  }
-
+  // If already shown this session, skip immediately
   if (sessionStorage.getItem('ch_preloader_shown')) {
-    preloader.classList.add('--hidden');
-    return Promise.resolve();
+    preloader.classList.add('--skip');
+    return;
   }
 
-  return new Promise<void>((resolve) => {
-    const TOTAL = 50;
-    const DURATION = 1800;
-    const start = Date.now();
-
-    function ease(t: number): number {
-      return 1 - Math.pow(1 - t, 4);
-    }
-
-    function update() {
-      const t = Math.min((Date.now() - start) / DURATION, 1);
-      const pct = Math.round(ease(t) * 100);
-      const filled = Math.round((pct / 100) * TOTAL);
-      const empty = TOTAL - filled;
-
-      barEl!.textContent = '='.repeat(filled);
-      barEl!.style.width = ((filled / TOTAL) * 100) + '%';
-      blankEl!.textContent = ' '.repeat(empty);
-      blankEl!.style.width = ((empty / TOTAL) * 100) + '%';
-
-      let s = String(pct);
-      while (s.length < 3) s = '\u00A0' + s;
-      percentEl!.textContent = s + '%';
-
-      if (pct >= 100) {
-        clearInterval(timer);
-        // Brief pause at 100%, then fade out
-        setTimeout(() => {
-          preloader!.classList.add('--done');
-          sessionStorage.setItem('ch_preloader_shown', 'true');
-          setTimeout(() => {
-            preloader!.remove();
-            resolve();
-          }, 600);
-        }, 400);
-      }
-    }
-
-    // setInterval is more reliable than rAF in Safari during page load
-    const timer = setInterval(update, 16);
-    update(); // First frame immediately
-  });
+  // Mark as shown and schedule DOM removal after CSS animation completes
+  sessionStorage.setItem('ch_preloader_shown', 'true');
+  // CSS animation: 1.8s fill + 0.4s pause + 0.5s fade = 2.7s total
+  setTimeout(() => {
+    preloader.remove();
+  }, 3000);
 }
 
 if (!window.__chRouterInited) {
@@ -166,9 +125,7 @@ if (!window.__chRouterInited) {
   document.addEventListener(TRANSITION_BEFORE_PREPARATION, onBeforePreparation);
   document.addEventListener(TRANSITION_PAGE_LOAD, onPageLoad);
 
-  // Initial load: run preloader first, then init page
-  runPreloader().then(() => {
-    onPageLoad();
-  });
+  // Initial load
+  handlePreloader();
+  onPageLoad();
 }
-
