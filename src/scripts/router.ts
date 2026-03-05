@@ -92,6 +92,9 @@ function onBeforePreparation(ev: Event) {
 }
 
 function onPageLoad() {
+  // Clean up preloader on every page load (View Transitions re-create the element)
+  handlePreloader();
+
   initSiteOnce();
   initPage();
 
@@ -126,6 +129,5 @@ if (!window.__chRouterInited) {
   document.addEventListener(TRANSITION_PAGE_LOAD, onPageLoad);
 
   // Initial load
-  handlePreloader();
   onPageLoad();
 }
