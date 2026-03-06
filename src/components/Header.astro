@@ -8,9 +8,9 @@ const { currentPage = "" } = Astro.props;
 const isAboutPage = currentPage === "about";
 ---
 
-<header class="header absolute s:fixed top-0 w-full py-20 z-50 pointer-events-none">
+<header class="header fixed top-0 w-full py-12 s:py-16 z-50 bg-[#f7f7f7]/80 backdrop-blur-sm border-t-1 border-black/20">
   <nav class="-container pointer-events-none">
-    <div class="-grid pointer-events-none">
+    <div class="-grid items-center pointer-events-none">
       <div class="col-span-1 s:col-span-2 pointer-events-none">
         {
           currentPage === "home" ? (

@@ -73,7 +73,7 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        gap: 0.25rem;
+        gap: 0;
         opacity: 0; /* GSAP animates this */
         transform: translateY(20px);
     }
@@ -84,7 +84,7 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
         flex-direction: column;
         justify-content: flex-start;
         align-items: flex-start;
-        gap: 0.25rem;
+        gap: 0;
         opacity: 0; /* GSAP animates this */
         transform: translateY(20px);
     }
@@ -94,12 +94,15 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
         text-transform: uppercase;
         font-size: 0.65rem;
         letter-spacing: 0.05em;
+        line-height: 1;
     }
 
     .meta-value {
         color: #000;
-        font-size: 1rem;
+        font-size: 0.8rem;
         font-weight: 500;
+        line-height: 1;
+        margin-top: -0.05rem;
     }
 
     /* Mobile Layout overrides */
@@ -147,10 +150,15 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
             const imgSrc = typeof project.data.image === "string" ? project.data.image : project.data.image[0];
 
             return (
-                <a class="verticalSlider_card block js-vertical-card" id={`card-${index}`} href={`/work/${project.slug}`}>
+                <div class="verticalSlider_card js-vertical-card" id={`card-${index}`}>
                     <div class="-container h-full w-full">
                         <div class="-grid h-full items-center relative">
-                            <div class="verticalSlider_imageWrap col-span-full s:col-span-4 s:col-start-3" data-index={index} data-cursor-text="view">
+                            <a
+                                class="verticalSlider_imageWrap col-span-full s:col-span-4 s:col-start-3 block"
+                                data-index={index}
+                                data-cursor-text="view"
+                                href={`/work/${project.slug}`}
+                            >
                                 <img
                                     src={imgSrc}
                                     alt={project.data.title}
@@ -158,16 +166,18 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
                                     decoding="async"
                                     class="verticalSlider_image js-clip-reveal"
                                 />
-                            </div>
+                            </a>
                         </div>
                     </div>
 
                     <div class="verticalSlider_content">
                         <div class="-container h-full w-full">
                             <div class="verticalSlider_information -grid relative w-full">
-                                <div class="verticalSlider_name col-span-full s:col-span-2 js-fade-up">
+                                <div class="verticalSlider_name col-span-full s:col-span-2 js-fade-up pointer-events-auto">
                                     <span class="meta-label">Project</span>
-                                    <span class="meta-value uppercase">{project.data.title}</span>
+                                    <a class="meta-value uppercase hover:opacity-70 transition-opacity" href={`/work/${project.slug}`}>
+                                        {project.data.title}
+                                    </a>
                                 </div>
                                 <div class="verticalSlider_industry col-span-full s:col-span-2 s:col-start-8 js-fade-up">
                                     <span class="meta-label">Industry</span>
@@ -176,7 +186,7 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
                             </div>
                         </div>
                     </div>
-                </a>
+                </div>
             );
         })
     }
