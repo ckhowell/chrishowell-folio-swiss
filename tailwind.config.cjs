@@ -43,9 +43,7 @@ module.exports = {
     },
     extend: {
       fontFamily: {
-        // Overriding sans with a monospace stack to apply it globally
-        sans: ['"SF Mono"', '"Fira Code"', '"Cascadia Code"', '"Consolas"', 'monospace', ...defaultTheme.fontFamily.sans],
-        mono: ['"SF Mono"', '"Fira Code"', '"Cascadia Code"', '"Consolas"', 'monospace', ...defaultTheme.fontFamily.mono],
+        sans: ['PP Neue Montreal', ...defaultTheme.fontFamily.sans],
       },
       borderWidth: {
         '1': '0.0625rem',
