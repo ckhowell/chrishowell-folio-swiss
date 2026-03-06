@@ -71,10 +71,8 @@
     overflow-x: clip;
     background-color: #f7f7f7;
     color: #1a1a1a;
-    font-family: 'PP Neue Montreal', sans-serif;
-    font-kerning: none;
-    text-rendering: optimizeSpeed;
-    -webkit-font-smoothing: antialiased;
+    font-family: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+    -webkit-font-smoothing: auto;
   }
 
   /* Hidden scrollbar */
@@ -213,18 +211,25 @@
   }
 }
 
-/* The always-visible small dot */
+/* The always-visible block caret */
 .cursor-dot {
   width: 10px;
-  height: 10px;
-  border-radius: 50%;
+  height: 20px; /* Taller to look like a | or block caret */
   background: #1a1a1a;
   transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  animation: blinkCaret 1s step-end infinite;
 }
 
-/* Hide dot when hovering navigation symbol links */
+@keyframes blinkCaret {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0; }
+}
+
+/* Pause blinking and scale down when hovering navigation symbol links */
 body:has(.hover-symbol-link:hover) .cursor-dot {
   transform: scale(0);
+  animation: none;
+  opacity: 0;
 }
 
 /* The expanding pill */
@@ -308,6 +313,19 @@ body:has(.hover-symbol-link:hover) .cursor-dot {
 
 /* Only apply hover effects on devices that have a real pointer */
 @media (hover: hover) {
+  /* CLI style prefix on hover for symbol links */
+  .hover-symbol-link:not(.header__logo)::before {
+    content: '> ';
+    opacity: 0;
+    transform: translateX(-1ch);
+    transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  .hover-symbol-link:not(.header__logo):hover::before {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
   .hover-symbol-link:not(.header__logo):hover {
     transform: translateX(1.5ch);
   }

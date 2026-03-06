@@ -148,7 +148,7 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
 
             return (
                 <a class="verticalSlider_card block js-vertical-card" id={`card-${index}`} href={`/work/${project.slug}`}>
-                    <div class="-container h-full w-full">
+                    <div class="-container h-full w-full border-x-1 border-black/20">
                         <div class="-grid h-full items-center relative">
                             <div class="verticalSlider_imageWrap col-span-full s:col-span-4 s:col-start-3" data-index={index} data-cursor-text="view">
                                 <img
@@ -163,7 +163,7 @@ const featured = projects.filter((p) => p.data.isFeatured).sort((a, b) => new Da
                     </div>
 
                     <div class="verticalSlider_content">
-                        <div class="-container h-full w-full">
+                        <div class="-container h-full w-full border-x-1 border-transparent">
                             <div class="verticalSlider_information -grid relative w-full">
                                 <div class="verticalSlider_name col-span-full s:col-span-2 js-fade-up">
                                     <span class="meta-label">Project</span>
