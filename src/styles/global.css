@@ -308,7 +308,7 @@ body:has(.hover-symbol-link:hover) .cursor-dot {
 
 /* Only apply hover effects on devices that have a real pointer */
 @media (hover: hover) {
-  .hover-symbol-link:not(.header__logo):hover {
+  .hover-symbol-link:hover {
     transform: translateX(1.5ch);
   }
 

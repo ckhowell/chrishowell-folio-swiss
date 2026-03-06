@@ -12,9 +12,17 @@ const isAboutPage = currentPage === "about";
   <nav class="-container pointer-events-none">
     <div class="-grid pointer-events-none">
       <div class="col-span-1 s:col-span-2 pointer-events-none">
-        <a class="header__logo hover-symbol-link block w-max group pointer-events-auto" href="/">
-          <AnimatedLogo />
-        </a>
+        {
+          currentPage === "home" ? (
+            <div class="header__logo block w-max pointer-events-auto cursor-default">
+              <AnimatedLogo />
+            </div>
+          ) : (
+            <a class="header__logo hover-symbol-link block w-max group pointer-events-auto" href="/">
+              <AnimatedLogo />
+            </a>
+          )
+        }
       </div>
       <div class="col-span-1 s:col-start-4 pointer-events-none"></div>
       <div class="col-span-2 s:col-span-4 s:col-start-8 pointer-events-none">

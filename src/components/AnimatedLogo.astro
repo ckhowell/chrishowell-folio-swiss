@@ -49,10 +49,19 @@
         const mobileBreakpoint = 768;
 
         // The user explicitly defined the right-to-left fade order via IDs:
-        const explicitFadeOrder = ["E", "W", "O", "S", "I", "R", "H1"];
+        // Grouping ["I", "R", "H1"] to fade together at the end.
+        const explicitFadeOrder = ["E", "W", "O", "H", "S", ["I", "R", "H1"]];
 
-        // Ensure all these elements actually exist in the DOM
-        const explicitFades = explicitFadeOrder.map((id) => document.getElementById(id)).filter((el) => el !== null) as HTMLElement[];
+        // Process elements and group them
+        const explicitFades = explicitFadeOrder
+            .map((group) => {
+                if (Array.isArray(group)) {
+                    return group.map((id) => document.getElementById(id)).filter((el) => el !== null) as HTMLElement[];
+                }
+                const el = document.getElementById(group);
+                return el ? [el] : [];
+            })
+            .filter((group) => group.length > 0);
 
         let targetProgress = 1; // 1 = collapsed, 0 = expanded
         let currentProgress = 1;
@@ -78,21 +87,24 @@
             const slashOffset = -141.94 * progress;
 
             // Apply opacity based on their explicitly defined order
-            explicitFades.forEach((el, index) => {
+            const fadeEndProgress = 0.6; // All letters vanish by 60% of the movement
+            explicitFades.forEach((group, index) => {
                 const total = explicitFades.length;
 
-                // Since the array is already ordered perfectly right-to-left
-                const startP = index / total;
-                const endP = (index + 1) / total;
+                // Divide the 60% window into equal slices for each group
+                const startP = (index / total) * fadeEndProgress;
+                const endP = ((index + 1) / total) * fadeEndProgress;
 
                 // Math.max/min to clamp it between 0 and 1
                 let localProgress = (progress - startP) / (endP - startP);
                 localProgress = Math.max(0, Math.min(1, localProgress));
 
-                // Exponential curve for snapping invisible
-                const opacity = Math.max(1 - Math.pow(localProgress, 2), 0);
+                // Fourth-power curve for a very aggressive snap to zero opacity
+                const opacity = Math.max(1 - Math.pow(localProgress, 4), 0);
 
-                el.style.opacity = opacity.toString();
+                group.forEach((el) => {
+                    el.style.opacity = opacity.toString();
+                });
             });
 
             // Still need to apply the global transform shift to all fade-letters to keep them morphing
