@@ -2,8 +2,9 @@ import Lenis from 'lenis';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { TextPlugin } from 'gsap/TextPlugin';
 
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText, TextPlugin);
 
 declare global {
   interface Window {
@@ -121,7 +122,7 @@ function initParagraphAnimations() {
   elements.forEach((el) => paragraphObserver?.observe(el));
 }
 
-// ── TITLE REVEAL — SplitText character-by-character mask ────────────
+// ── TITLE REVEAL — Primitive Graphics Block Render ────────────
 function initTitleAnimations() {
   titleObserver?.disconnect();
 
@@ -138,18 +139,44 @@ function initTitleAnimations() {
           el.classList.add('--is-visible');
           el.style.visibility = 'visible';
 
+          // Split into characters
           new SplitText(el, {
-            type: 'words, chars',
-            autoSplit: true,
-            mask: 'chars',
+            type: 'chars',
             charsClass: 'char',
             onSplit: (self: any) => {
-              return gsap.from(self.chars, {
-                duration: 1,
-                yPercent: -120,
-                scale: 1.2,
-                stagger: 0.01,
-                ease: 'expo.out',
+              const chars = self.chars;
+
+              // Initially hide all characters
+              gsap.set(chars, { opacity: 0 });
+
+              // Stagger the reveal of characters
+              chars.forEach((charEl: HTMLElement, i: number) => {
+                const isWhitespace = charEl.textContent === ' ' || !charEl.textContent;
+
+                // If it's a space, just make it visible immediately and skip the block effect
+                if (isWhitespace) {
+                  gsap.set(charEl, { opacity: 1 });
+                  return;
+                }
+
+                // Temporary object to track the animation state
+                const state = { val: 0 };
+                const originalChar = charEl.textContent;
+
+                gsap.to(state, {
+                  val: 1,
+                  duration: 0.15,
+                  delay: i * 0.05 + 0.1, // Stagger left-to-right rapidly
+                  onStart: () => {
+                    // Start by showing a solid block
+                    charEl.style.opacity = '1';
+                    charEl.textContent = '█';
+                  },
+                  onComplete: () => {
+                    // Turn it back into the real letter instantly
+                    charEl.textContent = originalChar;
+                  }
+                });
               });
             },
           });

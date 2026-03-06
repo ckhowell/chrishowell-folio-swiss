@@ -57,7 +57,7 @@ function animatePageLeave(signal?: AbortSignal) {
   }
 
   if (titleChars.length) {
-    tl.to(titleChars, { yPercent: -120, duration: 0.35, stagger: 0.002 }, 0);
+    tl.to(titleChars, { yPercent: -120, autoAlpha: 0, duration: 0.35, stagger: 0.002 }, 0);
   }
 
   if (opaInEls.length) {
