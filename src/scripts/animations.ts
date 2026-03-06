@@ -262,6 +262,27 @@ function bindCursorInitToMain() {
     { once: true }
   );
 }
+// Force reset the cursor when navigating away from a page
+export function resetCustomCursor() {
+  const cursor = document.querySelector('.custom-cursor');
+  if (!cursor) return;
+
+  const dot = cursor.querySelector('.cursor-dot') as HTMLElement;
+  const pill = cursor.querySelector('.cursor-pill') as HTMLElement;
+  const pillBg = cursor.querySelector('.cursor-pill-bg') as HTMLElement;
+  const textWrap = cursor.querySelector('.cursor-text-wrap') as HTMLElement;
+
+  if (dot && pill && pillBg && textWrap) {
+    // Kill any running tweens on the cursor children
+    gsap.killTweensOf([dot, pill, pillBg, textWrap]);
+
+    // Reset to default CSS properties
+    gsap.set(dot, { scale: 1, clearProps: 'all' });
+    gsap.set(pill, { width: 0, opacity: 0, clearProps: 'all' });
+    gsap.set(pillBg, { scale: 0, clearProps: 'all' });
+    gsap.set(textWrap, { opacity: 0, clearProps: 'all' });
+  }
+}
 
 // ── PILL HOVER — Pill animation + ticker on thumbnail hover ─────────
 function initPillHover() {

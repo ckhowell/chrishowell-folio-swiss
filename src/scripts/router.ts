@@ -6,7 +6,7 @@ import {
   type TransitionBeforePreparationEvent,
 } from 'astro:transitions/client';
 
-import { initPage, initSiteOnce } from './animations';
+import { initPage, initSiteOnce, resetCustomCursor } from './animations';
 
 declare global {
   interface Window {
@@ -44,6 +44,9 @@ function animatePageLeave(signal?: AbortSignal) {
   });
 
   tl.set(main, { pointerEvents: 'none' }, 0);
+
+  // Force reset custom cursor immediately on navigation
+  resetCustomCursor();
 
   if (paragraphLines.length) {
     tl.to(

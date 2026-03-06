@@ -36,7 +36,7 @@ const { title, description, bodyClass = "", currentPage = "" } = Astro.props;
     <Footer />
 
     <!-- Custom cursor -->
-    <div class="custom-cursor" aria-hidden="true">
+    <div class="custom-cursor" aria-hidden="true" transition:persist="custom-cursor">
       <div class="cursor-dot"></div>
       <div class="cursor-pill">
         <div class="cursor-pill-bg">
